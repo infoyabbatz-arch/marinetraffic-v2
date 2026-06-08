@@ -6,11 +6,7 @@ export const navigation: NavItem[] = [
     href: "/",
   },
   {
-    label: "About",
-    href: "/about",
-  },
-  {
-    label: "Services",
+    label: "Solutions",
     href: "/services",
   },
   {
@@ -18,8 +14,16 @@ export const navigation: NavItem[] = [
     href: "/industries",
   },
   {
-    label: "Tracking",
+    label: "Track Shipment",
     href: "/track",
+  },
+  {
+    label: "Bandari Salama™",
+    href: "/portal/login",
+  },
+  {
+    label: "About",
+    href: "/about",
   },
   {
     label: "Contact",
