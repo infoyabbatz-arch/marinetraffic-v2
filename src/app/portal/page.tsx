@@ -231,30 +231,7 @@ export default function PortalPage() {
 
           <div className="mt-8">
             <h2 className="text-2xl font-black">
-<div className="mt-8 grid gap-6 lg:grid-cols-3">
-<div className="rounded-3xl border border-cyan-500/20 bg-slate-900/70 backdrop-blur p-6">
-<h3 className="text-lg font-black text-cyan-400">Vessel Monitoring</h3>
-<div className="mt-4 space-y-3">
-<div className="flex justify-between"><span>MSC Aurora</span><span className="text-emerald-400">Online</span></div>
-<div className="flex justify-between"><span>Maersk Atlas</span><span className="text-amber-400">Docking</span></div>
-<div className="flex justify-between"><span>Ever Global</span><span className="text-cyan-400">In Transit</span></div>
-</div>
-</div>
-<div className="rounded-3xl border border-purple-500/20 bg-slate-900/70 backdrop-blur p-6">
-<h3 className="text-lg font-black text-purple-400">Financial Activity</h3>
-<div className="mt-5 h-32 rounded-2xl bg-gradient-to-r from-purple-500/20 via-cyan-500/20 to-amber-500/20"></div>
-<p className="mt-3 text-slate-400 text-sm">Operational finance activity stream.</p>
-</div>
-<div className="rounded-3xl border border-emerald-500/20 bg-slate-900/70 backdrop-blur p-6">
-<h3 className="text-lg font-black text-emerald-400">Operations Status</h3>
-<div className="mt-4 space-y-3">
-<div className="flex justify-between"><span>Customs</span><span className="text-emerald-400">Active</span></div>
-<div className="flex justify-between"><span>Warehousing</span><span className="text-emerald-400">Active</span></div>
-<div className="flex justify-between"><span>Tracking Grid</span><span className="text-emerald-400">Online</span></div>
-</div>
-</div>
-</div>
-              Bandari Salama Powered by Faithful Yabba
+Bandari Salama Powered by Faithful Yabba
             </h2>
 
             <p className="mt-3 text-slate-300">
