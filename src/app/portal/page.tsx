@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import PortalSidebar from "@/components/portal/PortalSidebar";
 
@@ -108,13 +109,24 @@ export default function PortalPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
+    <main className="min-h-screen bg-slate-950 text-white relative overflow-hidden">
+      <div className="absolute inset-0">
+        <Image
+          src="/images/finance-command-center.jpg"
+          alt="Finance Command Center"
+          fill
+          priority
+          className="object-cover opacity-20"
+        />
+      </div>
+      <div className="absolute inset-0 bg-slate-950/85" />
+      <div className="relative z-10">
       <div className="border-b bg-white">
         <div className="mx-auto max-w-7xl px-6 py-5 flex items-center justify-between">
           <div>
     
 <div>
-  <h1 className="text-4xl font-black leading-none">
+  <h1 className="text-5xl font-black text-amber-400 leading-none">
     Bandari Salama™
   </h1>
 
@@ -122,7 +134,7 @@ export default function PortalPage() {
     By faithfulyabba
   </div>
 
-  <p className="text-slate-600 mt-1">
+  <p className="text-slate-300 mt-1">
     {email}
   </p>
 </div>
@@ -139,6 +151,16 @@ export default function PortalPage() {
       </div>
 
       <div className="mx-auto max-w-7xl p-6">
+<div className="mb-8 rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-8 shadow-2xl">
+<h2 className="text-3xl font-black text-amber-400">Finance Command Center</h2>
+<p className="mt-2 text-slate-300">Real-time logistics intelligence, cargo visibility, financial workflow monitoring and operational analytics.</p>
+<div className="mt-6 grid gap-4 md:grid-cols-4">
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Revenue Status</div><div className="text-2xl font-black text-emerald-400">ACTIVE</div></div>
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Cargo Network</div><div className="text-2xl font-black text-cyan-400">ONLINE</div></div>
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Documents</div><div className="text-2xl font-black text-amber-400">SECURE</div></div>
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Tracking Grid</div><div className="text-2xl font-black text-purple-400">LIVE</div></div>
+</div>
+</div>
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           <PortalSidebar />
 
@@ -146,33 +168,33 @@ export default function PortalPage() {
 
         <div className="grid gap-6 md:grid-cols-4">
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-slate-500">Quotes</p>
-            <h2 className="mt-2 text-4xl font-black">
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">Quotes</p>
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
               {quoteCount}
             </h2>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-slate-500">Shipments</p>
-            <h2 className="mt-2 text-4xl font-black">
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">Shipments</p>
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
               {shipmentCount}
             </h2>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-slate-500">Documents</p>
-            <h2 className="mt-2 text-4xl font-black">
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">Documents</p>
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
               {documentCount}
             </h2>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-slate-500">
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">
               Active Tracking
             </p>
 
-            <h2 className="mt-2 text-4xl font-black">
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
               {trackingCount}
             </h2>
           </div>
@@ -202,17 +224,40 @@ export default function PortalPage() {
               </p>
             </div>
           ) : (
-            <p className="mt-3 text-slate-500">
+            <p className="mt-3 text-slate-400">
               No shipment found.
             </p>
           )}
 
           <div className="mt-8">
             <h2 className="text-2xl font-black">
+<div className="mt-8 grid gap-6 lg:grid-cols-3">
+<div className="rounded-3xl border border-cyan-500/20 bg-slate-900/70 backdrop-blur p-6">
+<h3 className="text-lg font-black text-cyan-400">Vessel Monitoring</h3>
+<div className="mt-4 space-y-3">
+<div className="flex justify-between"><span>MSC Aurora</span><span className="text-emerald-400">Online</span></div>
+<div className="flex justify-between"><span>Maersk Atlas</span><span className="text-amber-400">Docking</span></div>
+<div className="flex justify-between"><span>Ever Global</span><span className="text-cyan-400">In Transit</span></div>
+</div>
+</div>
+<div className="rounded-3xl border border-purple-500/20 bg-slate-900/70 backdrop-blur p-6">
+<h3 className="text-lg font-black text-purple-400">Financial Activity</h3>
+<div className="mt-5 h-32 rounded-2xl bg-gradient-to-r from-purple-500/20 via-cyan-500/20 to-amber-500/20"></div>
+<p className="mt-3 text-slate-400 text-sm">Operational finance activity stream.</p>
+</div>
+<div className="rounded-3xl border border-emerald-500/20 bg-slate-900/70 backdrop-blur p-6">
+<h3 className="text-lg font-black text-emerald-400">Operations Status</h3>
+<div className="mt-4 space-y-3">
+<div className="flex justify-between"><span>Customs</span><span className="text-emerald-400">Active</span></div>
+<div className="flex justify-between"><span>Warehousing</span><span className="text-emerald-400">Active</span></div>
+<div className="flex justify-between"><span>Tracking Grid</span><span className="text-emerald-400">Online</span></div>
+</div>
+</div>
+</div>
               Bandari Salama Powered by Faithful Yabba
             </h2>
 
-            <p className="mt-3 text-slate-600">
+            <p className="mt-3 text-slate-300">
               Digital logistics platform for cargo visibility,
               shipment tracking and document management.
             </p>
@@ -223,6 +268,7 @@ export default function PortalPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
+</main>
   );
 }
