@@ -6,7 +6,6 @@ import Link from "next/link";
 const slides = [
   "/images/hero-ship.png",
   "/images/port-city.jpg",
-  "/images/port-night.png",
 ];
 
 export default function Hero() {
