@@ -1,0 +1,274 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { supabaseBrowser } from "@/lib/supabase/browser";
+import PortalSidebar from "@/components/portal/PortalSidebar";
+
+export default function PortalPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+
+  const [quoteCount, setQuoteCount] = useState(0);
+  const [shipmentCount, setShipmentCount] = useState(0);
+  const [documentCount, setDocumentCount] = useState(0);
+  const [trackingCount, setTrackingCount] = useState(0);
+
+  const [latestShipment, setLatestShipment] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadDashboard() {
+      const {
+        data: { user },
+      } = await supabaseBrowser.auth.getUser();
+
+      if (!user) {
+        router.push("/portal/login");
+        return;
+      }
+
+      setEmail(user.email || "");
+
+      const { data: customer } = await supabaseBrowser
+        .from("customers")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!customer) return;
+
+      const customerId = customer.id;
+
+      const { count: quoteCountValue } = await supabaseBrowser
+        .from("quotes")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("customer_id", customerId);
+
+      setQuoteCount(quoteCountValue || 0);
+
+      const { data: shipments } = await supabaseBrowser
+        .from("shipments")
+        .select(`
+          *,
+          quotes!inner(
+            customer_id
+          )
+        `)
+        .eq("quotes.customer_id", customerId);
+
+      const shipmentList =
+        shipments || [];
+
+      const shipmentIds =
+        shipmentList.map((s: any) => s.id);
+
+      setShipmentCount(shipmentIds.length);
+
+      setLatestShipment(
+        shipmentList.length > 0
+          ? shipmentList[shipmentList.length - 1]
+          : null
+      );
+
+      if (shipmentIds.length > 0) {
+        const { count: documentCountValue } =
+          await supabaseBrowser
+            .from("documents")
+            .select("*", {
+              count: "exact",
+              head: true,
+            })
+            .in("shipment_id", shipmentIds);
+
+        setDocumentCount(documentCountValue || 0);
+
+        const { count: trackingCountValue } =
+          await supabaseBrowser
+            .from("tracking_events")
+            .select("*", {
+              count: "exact",
+              head: true,
+            })
+            .in("shipment_id", shipmentIds);
+
+        setTrackingCount(trackingCountValue || 0);
+      }
+    }
+
+    loadDashboard();
+  }, [router]);
+
+  async function handleLogout() {
+    await supabaseBrowser.auth.signOut();
+    router.push("/portal/login");
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-950 text-white relative overflow-hidden">
+      <div className="absolute inset-0">
+        <Image
+          src="/images/finance-command-center.jpg"
+          alt="Finance Command Center"
+          fill
+          priority
+          className="object-cover opacity-20"
+        />
+      </div>
+      <div className="absolute inset-0 bg-slate-950/85" />
+      <div className="relative z-10">
+      <div className="border-b bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-5 flex items-center justify-between">
+          <div>
+    
+<div>
+  <h1 className="text-5xl font-black text-amber-400 leading-none">
+    Bandari Salama™
+  </h1>
+
+  <div className="text-right text-sm font-semibold -mt-1">
+    By faithfulyabba
+  </div>
+
+  <p className="text-slate-300 mt-1">
+    {email}
+  </p>
+</div>
+
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="rounded-xl bg-red-500 px-5 py-3 font-bold text-white"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl p-6">
+<div className="mb-8 rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-8 shadow-2xl">
+<h2 className="text-3xl font-black text-amber-400">Finance Command Center</h2>
+<p className="mt-2 text-slate-300">Real-time logistics intelligence, cargo visibility, financial workflow monitoring and operational analytics.</p>
+<div className="mt-6 grid gap-4 md:grid-cols-4">
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Revenue Status</div><div className="text-2xl font-black text-emerald-400">ACTIVE</div></div>
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Cargo Network</div><div className="text-2xl font-black text-cyan-400">ONLINE</div></div>
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Documents</div><div className="text-2xl font-black text-amber-400">SECURE</div></div>
+<div className="rounded-2xl bg-slate-800/80 p-4"><div className="text-slate-400 text-sm">Tracking Grid</div><div className="text-2xl font-black text-purple-400">LIVE</div></div>
+</div>
+</div>
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+          <PortalSidebar />
+
+          <div>
+
+        <div className="grid gap-6 md:grid-cols-4">
+
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">Quotes</p>
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
+              {quoteCount}
+            </h2>
+          </div>
+
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">Shipments</p>
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
+              {shipmentCount}
+            </h2>
+          </div>
+
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">Documents</p>
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
+              {documentCount}
+            </h2>
+          </div>
+
+          <div className="rounded-3xl border border-amber-500/20 bg-slate-900/70 backdrop-blur p-6 shadow-2xl">
+            <p className="text-slate-400">
+              Active Tracking
+            </p>
+
+            <h2 className="mt-2 text-5xl font-black text-amber-400">
+              {trackingCount}
+            </h2>
+          </div>
+
+        </div>
+
+        <div className="mt-8 rounded-3xl bg-white p-8 shadow-sm">
+
+          <h2 className="text-2xl font-black">
+            Latest Shipment
+          </h2>
+
+          {latestShipment ? (
+            <div className="mt-4">
+              <p className="font-bold">
+                {latestShipment.vessel}
+              </p>
+
+              <p>
+                {latestShipment.origin}
+                {" → "}
+                {latestShipment.destination}
+              </p>
+
+              <p>
+                Status: {latestShipment.status}
+              </p>
+            </div>
+          ) : (
+            <p className="mt-3 text-slate-400">
+              No shipment found.
+            </p>
+          )}
+
+          <div className="mt-8">
+            <h2 className="text-2xl font-black">
+<div className="mt-8 grid gap-6 lg:grid-cols-3">
+<div className="rounded-3xl border border-cyan-500/20 bg-slate-900/70 backdrop-blur p-6">
+<h3 className="text-lg font-black text-cyan-400">Vessel Monitoring</h3>
+<div className="mt-4 space-y-3">
+<div className="flex justify-between"><span>MSC Aurora</span><span className="text-emerald-400">Online</span></div>
+<div className="flex justify-between"><span>Maersk Atlas</span><span className="text-amber-400">Docking</span></div>
+<div className="flex justify-between"><span>Ever Global</span><span className="text-cyan-400">In Transit</span></div>
+</div>
+</div>
+<div className="rounded-3xl border border-purple-500/20 bg-slate-900/70 backdrop-blur p-6">
+<h3 className="text-lg font-black text-purple-400">Financial Activity</h3>
+<div className="mt-5 h-32 rounded-2xl bg-gradient-to-r from-purple-500/20 via-cyan-500/20 to-amber-500/20"></div>
+<p className="mt-3 text-slate-400 text-sm">Operational finance activity stream.</p>
+</div>
+<div className="rounded-3xl border border-emerald-500/20 bg-slate-900/70 backdrop-blur p-6">
+<h3 className="text-lg font-black text-emerald-400">Operations Status</h3>
+<div className="mt-4 space-y-3">
+<div className="flex justify-between"><span>Customs</span><span className="text-emerald-400">Active</span></div>
+<div className="flex justify-between"><span>Warehousing</span><span className="text-emerald-400">Active</span></div>
+<div className="flex justify-between"><span>Tracking Grid</span><span className="text-emerald-400">Online</span></div>
+</div>
+</div>
+</div>
+              Bandari Salama Powered by Faithful Yabba
+            </h2>
+
+            <p className="mt-3 text-slate-300">
+              Digital logistics platform for cargo visibility,
+              shipment tracking and document management.
+            </p>
+          </div>
+
+        </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+</main>
+  );
+}
