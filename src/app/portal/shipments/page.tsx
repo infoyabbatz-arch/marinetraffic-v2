@@ -1,5 +1,7 @@
 "use client";
 
+import AuthGuard from "@/components/auth/AuthGuard";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
@@ -35,14 +37,16 @@ export default function ShipmentsPage() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (!customer) return;
+      const customerRecord: any = customer;
+
+      if (!customerRecord) return;
 
       const { data: quotes } = await supabaseBrowser
         .from("quotes")
         .select("id")
-        .eq("customer_id", customer.id);
+        .eq("customer_id", customerRecord.id);
 
-      const quoteIds = (quotes || []).map((q) => q.id);
+      const quoteIds = ((quotes as any[]) || []).map((q: any) => q.id);
 
       if (quoteIds.length === 0) {
         setShipments([]);
@@ -61,7 +65,8 @@ export default function ShipmentsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-100">
+    <AuthGuard>
+<main className="min-h-screen bg-slate-100">
       <div className="mx-auto max-w-7xl p-6">
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           <PortalSidebar />
@@ -102,5 +107,6 @@ export default function ShipmentsPage() {
         </div>
       </div>
     </main>
+</AuthGuard>
   );
 }

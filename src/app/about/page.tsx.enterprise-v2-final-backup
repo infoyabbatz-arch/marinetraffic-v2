@@ -1,0 +1,184 @@
+export default function AboutPage() {
+  const timeline = [
+    "2016 • The Edge Logistics Tanzania",
+    "Devex Africa",
+    "Abstan Logistics Limited",
+    "MarineTraffic Group"
+  ];
+
+  const mentors = [
+    {
+      name: "Lungaisa Ally Omary",
+      title: "First Mentor, Elder Brother & Lifelong Friend",
+      description:
+        "Founder of The Edge Logistics Tanzania and a professional in Business Development & Finance. He was the first person to recognize Johnrich Yabba's potential, providing opportunity, guidance and practical industry knowledge that became the foundation of MarineTraffic Group."
+    },
+    {
+      name: "Lambaji Madai",
+      title: "Managing Director, Devex Africa",
+      description:
+        "A respected legal professional and business leader whose leadership helped shape a deeper understanding of governance, compliance, accountability and sustainable business practices."
+    },
+    {
+      name: "Stanford Mora",
+      title: "Founder & Managing Director, Abstan Logistics",
+      description:
+        "Former Director of Business Development & Operations at Devex Africa. His entrepreneurial leadership and exceptional financial discipline became one of the strongest influences behind the MarineTraffic Group vision."
+    }
+  ];
+
+  return (
+    <main className="bg-white">
+
+      <section className="py-24 text-center">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="uppercase tracking-[0.3em] text-amber-600 font-semibold">
+            About MarineTraffic Group
+          </p>
+
+          <h1 className="mt-6 text-6xl font-black text-slate-900">
+            Where Local Meets Global
+          </h1>
+
+          <p className="mx-auto mt-8 max-w-4xl text-xl leading-9 text-slate-600">
+            MarineTraffic Group delivers customs clearance, freight forwarding,
+            transportation, warehousing and trade compliance solutions across
+            Tanzania and East Africa.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-20 bg-slate-50">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="text-5xl font-black text-slate-900">
+            Founder's Journey
+          </h2>
+
+          <div className="mt-10 space-y-8 text-lg leading-9 text-slate-600">
+            <p>
+              The story of MarineTraffic Group began in 2016 when Johnrich Yabba
+              entered the logistics industry immediately after completing his
+              studies at the Institute of Tax Administration.
+            </p>
+
+            <p>
+              His first opportunity came through The Edge Logistics Tanzania
+              Limited under the leadership of Lungaisa Ally Omary, who became
+              not only a mentor, but also a trusted elder brother and lifelong
+              friend. Through his guidance, Johnrich learned customs clearance,
+              freight forwarding, port operations and professional leadership.
+            </p>
+
+            <p>
+              each chapter adding valuable experience in trade facilitation,
+              logistics management, compliance and entrepreneurship.
+            </p>
+
+            <p>
+              Today, MarineTraffic Group stands as a reflection of those
+              experiences, relationships and lessons learned throughout a decade
+              of dedication to Tanzania's logistics industry.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="text-center text-5xl font-black text-slate-900">
+            Career Timeline
+          </h2>
+
+          <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {timeline.map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm"
+              >
+                <p className="font-bold text-slate-900">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-900 py-20 text-white">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="text-center text-5xl font-black">
+            Mentors & Acknowledgements
+          </h2>
+
+          <div className="mt-16 grid gap-8 lg:grid-cols-3">
+            {mentors.map((mentor) => (
+              <div
+                key={mentor.name}
+                className="rounded-3xl border border-slate-700 p-8"
+              >
+                <h3 className="text-2xl font-black">{mentor.name}</h3>
+
+                <p className="mt-3 text-amber-400 font-semibold">
+                  {mentor.title}
+                </p>
+
+                <p className="mt-6 text-slate-300 leading-8">
+                  {mentor.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="mx-auto max-w-6xl px-6 grid gap-10 lg:grid-cols-2">
+          <div className="rounded-3xl bg-slate-50 p-10">
+            <h2 className="text-4xl font-black text-slate-900">Mission</h2>
+            <p className="mt-6 text-lg leading-8 text-slate-600">
+              To simplify international trade through reliable customs
+              clearance, logistics and compliance solutions that empower
+              businesses across East Africa.
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-slate-900 p-10 text-white">
+            <h2 className="text-4xl font-black">Vision</h2>
+            <p className="mt-6 text-lg leading-8 text-slate-300">
+              To become East Africa's most trusted logistics and trade
+              facilitation partner.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="mx-auto max-w-5xl rounded-[40px] bg-slate-900 px-10 py-20 text-center text-white">
+          <h2 className="text-5xl font-black">
+            Ready To Work With MarineTraffic Group?
+          </h2>
+
+          <p className="mt-6 text-xl text-slate-300">
+            Customs clearance, freight forwarding and trade solutions
+            tailored to your business.
+          </p>
+
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <a
+              href="/quote"
+              className="rounded-xl bg-amber-500 px-8 py-4 font-bold text-slate-900"
+            >
+              Request Quote
+            </a>
+
+            <a
+              href="/portal/login"
+              className="rounded-xl border border-white px-8 py-4 font-bold"
+            >
+              Access Bandari Salama™
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  );
+}

@@ -4,17 +4,30 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
+
 const items = [
   {
     label: "Dashboard",
     href: "/portal",
   },
   {
-    label: "My Quotes",
+    label: "Customers",
+    href: "/portal/customers",
+  },
+  {
+    label: "Invoices",
+    href: "/portal/invoices",
+  },
+  {
+    label: "Reports",
+    href: "/portal/reports",
+  },
+  {
+    label: "Quotes",
     href: "/portal/quotes",
   },
   {
-    label: "My Shipments",
+    label: "Shipments",
     href: "/portal/shipments",
   },
   {
@@ -26,10 +39,16 @@ const items = [
     href: "/portal/tracking",
   },
   {
+    label: "Billing & Subscription",
+    href: "/pricing",
+  },
+  {
     label: "Profile",
     href: "/portal/profile",
   },
 ];
+
+
 
 export default function PortalSidebar() {
   const pathname = usePathname();
@@ -41,7 +60,7 @@ export default function PortalSidebar() {
   }
 
   return (
-    <aside className="rounded-3xl border bg-white p-6 shadow-sm h-fit">
+    <aside className="rounded-3xl border bg-white p-6 shadow-sm">
       <div>
         <h2 className="text-2xl font-black leading-none">
           Bandari Salama™
@@ -62,25 +81,8 @@ export default function PortalSidebar() {
               href={item.href}
               className={
                 active
-                  ? `
-                    block
-                    rounded-xl
-                    px-4
-                    py-3
-                    font-bold
-                    bg-slate-900
-                    text-white
-                  `
-                  : `
-                    block
-                    rounded-xl
-                    border
-                    border-slate-200
-                    px-4
-                    py-3
-                    font-semibold
-                    hover:bg-slate-50
-                  `
+                  ? "block rounded-xl px-4 py-3 font-bold bg-slate-900 text-white"
+                  : "block rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-50 hover:text-slate-900"
               }
             >
               {item.label}
@@ -91,17 +93,7 @@ export default function PortalSidebar() {
 
       <button
         onClick={handleLogout}
-        className="
-          mt-6
-          w-full
-          rounded-xl
-          bg-red-600
-          px-4
-          py-3
-          font-bold
-          text-white
-          hover:bg-red-700
-        "
+        className="mt-6 w-full rounded-xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
       >
         Logout
       </button>

@@ -45,7 +45,7 @@ export default function ContactPage() {
               <div>
                 <strong>Address:</strong><br />
                 One Stop Center Tower,
-                17th Floor,
+                
                 Sokoine Drive,
                 Dar es Salaam,
                 Tanzania

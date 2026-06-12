@@ -2,7 +2,7 @@ import Container from "@/components/ui/Container";
 
 export default function Tracking() {
   return (
-    <section className="bg-slate-900 py-28">
+    <section className="bg-slate-900 py-16">
 
       <Container>
 

@@ -41,7 +41,7 @@ export default function About() {
             </p>
 
             <p className="text-slate-300">
-              17th Floor, Sokoine Drive
+               Sokoine Drive
             </p>
 
             <p className="text-slate-300">

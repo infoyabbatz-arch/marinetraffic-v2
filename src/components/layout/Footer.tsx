@@ -16,8 +16,8 @@ export default function Footer() {
             <Image
               src="/images/logo-full.png"
               alt="MarineTraffic Group"
-              width={260}
-              height={80}
+              width={180}
+              height={55}
               className="mb-6"
             />
 
@@ -82,7 +82,7 @@ export default function Footer() {
 
               <p>
                 One Stop Center Tower,
-                17th Floor,
+                
                 Sokoine Drive,
                 Dar es Salaam
               </p>

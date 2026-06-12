@@ -12,9 +12,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-lg shadow-sm">
       <Container>
-
         <div className="flex h-20 items-center justify-between">
-
           <Link
             href="/"
             className="flex items-center gap-3"
@@ -49,12 +47,21 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <a
-            href="#contact"
-            className="hidden lg:inline-flex rounded-xl bg-amber-500 px-5 py-3 font-bold text-slate-900 hover:bg-amber-400 transition"
-          >
-            Request Quote
-          </a>
+          <div className="hidden lg:flex items-center gap-3">
+            <Link
+              href="/timevault"
+              className="rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-800 hover:bg-slate-100 transition"
+            >
+              Access TimeVault™
+            </Link>
+
+            <Link
+              href="/bandari-salama"
+              className="rounded-xl bg-amber-500 px-5 py-3 font-bold text-slate-900 hover:bg-amber-400 transition"
+            >
+              Access Bandari Salama™
+            </Link>
+          </div>
 
           <button
             className="md:hidden text-2xl font-bold"
@@ -62,7 +69,6 @@ export default function Navbar() {
           >
             ☰
           </button>
-
         </div>
 
         {open && (
@@ -79,16 +85,22 @@ export default function Navbar() {
                 </Link>
               ))}
 
-              <a
-                href="#contact"
+              <Link
+                href="/timevault"
+                className="inline-flex w-fit rounded-lg border border-slate-300 px-4 py-2 font-bold text-slate-800"
+              >
+                Access TimeVault™
+              </Link>
+
+              <Link
+                href="/bandari-salama"
                 className="inline-flex w-fit rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-900"
               >
-                Request Quote
-              </a>
+                Access Bandari Salama™
+              </Link>
             </div>
           </div>
         )}
-
       </Container>
     </header>
   );

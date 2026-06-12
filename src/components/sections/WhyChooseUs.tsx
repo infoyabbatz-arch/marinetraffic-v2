@@ -1,75 +1,86 @@
-import Container from "@/components/ui/Container";
-import {
-  ShieldCheck,
-  Briefcase,
-  Globe2,
-  BadgeCheck,
-} from "lucide-react";
-
-const features = [
-  {
-    icon: ShieldCheck,
-    title: "Regulatory Compliance",
-    text: "Strong customs and trade compliance expertise.",
-  },
-  {
-    icon: Briefcase,
-    title: "Industry Experience",
-    text: "Serving Tanzania's trade ecosystem since 2016.",
-  },
-  {
-    icon: Globe2,
-    title: "Regional Reach",
-    text: "Supporting cargo movement across East Africa.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Professional Service",
-    text: "Reliable execution backed by accountability.",
-  },
-];
-
 export default function WhyChooseUs() {
+  const opportunities = [
+    {
+      icon: "☕",
+      title: "Coffee Exports",
+      market: "EU • Middle East • Asia",
+      status: "Growing Demand",
+    },
+    {
+      icon: "🥜",
+      title: "Cashew Trade",
+      market: "India • Vietnam • China",
+      status: "Strong Market",
+    },
+    {
+      icon: "🌾",
+      title: "Agricultural Commodities",
+      market: "Regional & Global",
+      status: "High Volume",
+    },
+    {
+      icon: "⛏️",
+      title: "Gold & Mining",
+      market: "International Buyers",
+      status: "Premium Sector",
+    },
+    {
+      icon: "🚢",
+      title: "Transit Cargo",
+      market: "DRC • Zambia • Malawi",
+      status: "Strategic Route",
+    },
+    {
+      icon: "📦",
+      title: "Container Logistics",
+      market: "Global Supply Chains",
+      status: "Active Trade",
+    },
+  ];
+
   return (
-    <section className="py-24 bg-slate-50">
-      <Container>
+    <section className="bg-slate-900 py-24">
+      <div className="mx-auto max-w-7xl px-6">
 
-        <div className="text-center">
-          <p className="uppercase tracking-[0.25em] text-amber-600 font-semibold">
-            Why Choose Us
-          </p>
+        <div className="mb-12 text-center">
+          <span className="rounded-full border border-amber-500/40 px-4 py-2 text-xs font-bold uppercase tracking-widest text-amber-400">
+            Global Trade Opportunities
+          </span>
 
-          <h2 className="mt-4 text-5xl font-black text-slate-900">
-            Trusted Logistics Partner
+          <h2 className="mt-6 text-4xl font-black text-white md:text-5xl">
+            Strategic Markets & Trade Sectors
           </h2>
+
+          <p className="mx-auto mt-4 max-w-3xl text-slate-300">
+            Explore high-value trade opportunities across East Africa
+            and international markets supported by MarineTraffic Group.
+          </p>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {opportunities.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-3xl border border-slate-700 bg-slate-950 p-8 transition-all hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/10"
+            >
+              <div className="mb-5 text-5xl">{item.icon}</div>
 
-          {features.map((item) => {
-            const Icon = item.icon;
+              <h3 className="text-2xl font-bold text-white">
+                {item.title}
+              </h3>
 
-            return (
-              <div
-                key={item.title}
-                className="rounded-3xl bg-white p-8 shadow-sm border border-slate-100"
-              >
-                <Icon className="h-10 w-10 text-amber-600" />
+              <p className="mt-4 text-slate-300">
+                Market Access: {item.market}
+              </p>
 
-                <h3 className="mt-5 text-xl font-bold">
-                  {item.title}
-                </h3>
-
-                <p className="mt-3 text-slate-600">
-                  {item.text}
-                </p>
+              <div className="mt-5 inline-flex rounded-full bg-amber-500/15 px-4 py-2 text-sm font-semibold text-amber-400">
+                {item.status}
               </div>
-            );
-          })}
-
+            </div>
+          ))}
         </div>
 
-      </Container>
+      </div>
     </section>
   );
 }

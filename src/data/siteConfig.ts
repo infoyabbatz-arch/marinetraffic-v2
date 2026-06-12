@@ -12,7 +12,7 @@ export const siteConfig = {
   office: "+255 717 009989",
 
   address:
-    "One Stop Center Tower, 17th Floor, Sokoine Drive, Dar es Salaam, Tanzania",
+    "One Stop Center Tower,  Sokoine Drive, Dar es Salaam, Tanzania",
 
   website: "https://www.marinetraffic.co.tz",
 

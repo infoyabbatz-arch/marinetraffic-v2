@@ -1,5 +1,7 @@
 "use client";
 
+import AuthGuard from "@/components/auth/AuthGuard";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
@@ -36,12 +38,14 @@ export default function QuotesPage() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (!customer) return;
+      const customerRecord: any = customer;
+
+      if (!customerRecord) return;
 
       const { data } = await supabaseBrowser
         .from("quotes")
         .select("*")
-        .eq("customer_id", customer.id)
+        .eq("customer_id", customerRecord.id)
         .order("created_at", {
           ascending: false,
         });
@@ -53,7 +57,8 @@ export default function QuotesPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-100">
+    <AuthGuard>
+<main className="min-h-screen bg-slate-100">
       <div className="mx-auto max-w-7xl p-6">
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           <PortalSidebar />
@@ -98,5 +103,6 @@ export default function QuotesPage() {
         </div>
       </div>
     </main>
+</AuthGuard>
   );
 }

@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
 import dynamic from "next/dynamic";
 
@@ -60,7 +58,7 @@ export default function TrackPage() {
 
   return (
     <>
-      <Navbar />
+      
 
       <main className="py-20 bg-slate-50 min-h-screen">
         <Container>
@@ -278,7 +276,7 @@ export default function TrackPage() {
         </Container>
       </main>
 
-      <Footer />
+      
     </>
   );
 }

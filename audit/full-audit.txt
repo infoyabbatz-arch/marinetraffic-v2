@@ -1,0 +1,63 @@
+===== ROUTES =====
+src/app/about/page.tsx
+src/app/academy/page.tsx
+src/app/api/quote/route.ts
+src/app/api/tracking/route.ts
+src/app/contact/page.tsx
+src/app/industries/page.tsx
+src/app/page.tsx
+src/app/portal/documents/page.tsx
+src/app/portal/login/page.tsx
+src/app/portal/page.tsx
+src/app/portal/profile/page.tsx
+src/app/portal/quotes/page.tsx
+src/app/portal/register/page.tsx
+src/app/portal/shipments/page.tsx
+src/app/portal/tracking/page.tsx
+src/app/quote/page.tsx
+src/app/services/page.tsx
+src/app/timevault/page.tsx
+src/app/track/page.tsx
+
+===== COMPONENTS =====
+src/components/layout/Footer.tsx
+src/components/layout/Navbar.before-timevault-button.tsx
+src/components/layout/Navbar.timevault-backup.tsx
+src/components/layout/Navbar.tsx
+src/components/portal/PortalSidebar.backup.finance-command-center.tsx
+src/components/portal/PortalSidebar.before-dark-finance.tsx
+src/components/portal/PortalSidebar.step344.backup.tsx
+src/components/portal/PortalSidebar.tsx
+src/components/sections/About.tsx
+src/components/sections/AcademyPreview.tsx
+src/components/sections/CTA.tsx
+src/components/sections/Hero.tsx
+src/components/sections/Hero.tsx.backup.20260609_020207
+src/components/sections/Hero.tsx.backup.20260609_072819
+src/components/sections/Hero.tsx.backup.20260609_153513
+src/components/sections/Hero.tsx.phase2b3.backup
+src/components/sections/Hero.tsx.preload-backup
+src/components/sections/Industries.tsx
+src/components/sections/Industries.tsx.backup.20260609_165134
+src/components/sections/Services.tsx
+src/components/sections/Services.tsx.backup.20260609_164557
+src/components/sections/Stats.tsx
+src/components/sections/Testimonials.tsx
+src/components/sections/Tracking.tsx
+src/components/sections/TrustedBy.tsx
+src/components/sections/WhyChooseUs.tsx
+src/components/tracking/WorldMap.tsx
+src/components/ui/Container.tsx
+src/components/ui/WhatsAppButton.tsx
+
+===== DATA =====
+src/data/academy.ts
+src/data/navigation.ts
+src/data/siteConfig.ts
+
+===== YOUTUBE =====
+
+===== API =====
+src/app/api/quote/route.pre-real-attachments.ts
+src/app/api/quote/route.ts
+src/app/api/tracking/route.ts

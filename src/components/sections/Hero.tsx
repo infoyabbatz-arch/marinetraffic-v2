@@ -3,61 +3,60 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+
+const tradeHeadlines = [
+  "East Africa trade volumes continue to expand across regional corridors",
+  "Dar es Salaam strengthens position as gateway to Central Africa",
+  "Agricultural exports record sustained growth in international markets",
+  "Containerized cargo demand remains strong across global trade routes",
+  "Digital logistics and cargo visibility transforming supply chains",
+];
+
 const slides = [
-  "/images/hero-ship.png",
-  "/images/port-city.jpg",
 
-  "/images/hero/hero-01.jpg",
-  "/images/hero/hero-02.jpg",
-  "/images/hero/hero-03.jpg",
-  "/images/hero/hero-04.jpg",
-  "/images/hero/hero-05.jpg",
-  "/images/hero/hero-06.jpg",
-  "/images/hero/hero-07.jpg",
-  "/images/hero/hero-08.jpg",
-  "/images/hero/hero-09.jpg",
-  "/images/hero/hero-10.jpg",
+  "/images/hero-enterprise/mining.jpg",
+  "/images/hero-enterprise/agriculture.jpg",
+  "/images/hero-enterprise/container-vessel.jpg",
+  "/images/hero-enterprise/oil-gas.jpg",
+  "/images/hero-enterprise/project-cargo.jpg",
+];
 
-  "/images/hero/hero-11.jpg",
-  "/images/hero/hero-12.jpg",
-  "/images/hero/hero-13.jpg",
-  "/images/hero/hero-14.jpg",
-  "/images/hero/hero-15.jpg",
-  "/images/hero/hero-16.jpg",
-  "/images/hero/hero-17.jpg",
-  "/images/hero/hero-18.jpg",
-  "/images/hero/hero-19.jpg",
-  "/images/hero/hero-20.jpg",
-
-  "/images/hero/hero-21.jpg",
-  "/images/hero/hero-22.jpg",
-  "/images/hero/hero-23.jpg",
-  "/images/hero/hero-24.jpg",
-  "/images/hero/hero-25.jpg",
-  "/images/hero/hero-26.jpg",
-  "/images/hero/hero-27.jpg",
-  "/images/hero/hero-28.jpg",
-  "/images/hero/hero-29.jpg",
-  "/images/hero/hero-30.jpg",
+const tradeNews = [
+  "East Africa trade volumes continue to expand",
+  "Container traffic growth across Indian Ocean routes",
+  "Mining exports drive regional logistics demand",
+  "Cross-border commerce accelerating across Africa",
+  "Port modernization improving cargo efficiency",
 ];
 
 export default function Hero() {
-  const [current, setCurrent] = useState(0);
+  
+const [current, setCurrent] = useState(0);
+const [headline, setHeadline] = useState(0);
+
+  const [ticker, setTicker] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const slider = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 3000);
+    }, 10000);
 
-    return () => clearInterval(timer);
+    const news = setInterval(() => {
+      setTicker((prev) => (prev + 1) % tradeNews.length);
+    }, 5000);
+
+    return () => {
+      clearInterval(slider);
+      clearInterval(news);
+    };
   }, []);
 
   return (
-    <section className="relative overflow-hidden min-h-[90vh]">
+    <section className="relative overflow-hidden min-h-screen">
       {slides.map((slide, index) => (
         <div
           key={slide}
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+          className={`absolute inset-0 bg-cover bg-center scale-105 transition-opacity duration-[1500ms] ${
             index === current ? "opacity-100" : "opacity-0"
           }`}
           style={{
@@ -66,49 +65,81 @@ export default function Hero() {
         />
       ))}
 
-      <div className="absolute inset-0 bg-slate-950/65" />
+      <div className="absolute inset-0 bg-slate-950/75" />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-40 lg:px-8">
-        <div className="max-w-4xl">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-          <p className="mb-6 text-sm font-bold uppercase tracking-[0.35em] text-amber-300">
-            MarineTraffic Group Tanzania
-          </p>
+      <div className="relative mx-auto max-w-7xl px-6 py-32 lg:px-8">
+        <div className="max-w-5xl">
 
-          <h1 className="text-5xl font-black leading-tight text-white md:text-7xl">
-            Where Local
+          <div className="mb-8 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-5 py-2 text-sm font-bold text-amber-300">
+            GLOBAL TRADE COMMAND CENTER
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-black leading-tight text-white">
+            Connecting Tanzania
             <br />
-            Meets Global
+            To Global Markets
           </h1>
 
           <p className="mt-8 max-w-3xl text-xl text-slate-200">
-            Customs clearance, freight forwarding,
-            trade compliance, import & export permits,
-            warehousing and transportation solutions
-            across Tanzania and East Africa.
+            Customs Clearance • Freight Forwarding • Port Operations •
+            Trade Intelligence • Project Cargo • Supply Chain Solutions
           </p>
 
-          <div className="mt-10 flex flex-wrap gap-5">
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link
+              href="/quote"
+              className="rounded-xl bg-amber-500 px-8 py-4 font-bold text-slate-900 hover:bg-amber-400"
+            >
+              Request Quote
+            </Link>
 
             <Link
               href="/track"
-              className="rounded-xl bg-amber-500 px-8 py-4 font-bold text-slate-900 hover:bg-amber-400 transition"
+              className="rounded-xl border border-white px-8 py-4 font-bold text-white hover:bg-white hover:text-slate-900"
             >
               Track Shipment
             </Link>
 
             <Link
-              href="/portal/login"
-              className="rounded-xl border border-white/20 bg-white/10 px-8 py-4 font-bold text-white backdrop-blur hover:bg-white/20 transition"
+              href="/timevault"
+              className="rounded-xl border border-amber-400 px-8 py-4 font-bold text-amber-300 hover:bg-amber-400 hover:text-slate-900"
             >
-              Access Bandari Salama™
+              Access TimeVault™
             </Link>
-
           </div>
 
-          <div className="mt-12 text-sm text-slate-300">
-            One Stop Center Tower, 17th Floor •
-            Sokoine Drive • Dar es Salaam
+          <div className="mt-12 rounded-2xl border border-amber-500/30 bg-slate-900/70 p-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-amber-300">
+              Live Trade Intelligence
+            </div>
+
+            <div className="mt-2 text-lg text-white">
+              {tradeNews[ticker]}
+            </div>
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-4">
+            <div className="rounded-2xl bg-slate-900/70 p-6">
+              <div className="text-3xl font-black text-amber-400">42+</div>
+              <div className="text-slate-300">Countries Served</div>
+            </div>
+
+            <div className="rounded-2xl bg-slate-900/70 p-6">
+              <div className="text-3xl font-black text-amber-400">12,500+</div>
+              <div className="text-slate-300">Shipments Managed</div>
+            </div>
+
+            <div className="rounded-2xl bg-slate-900/70 p-6">
+              <div className="text-3xl font-black text-amber-400">1,000+</div>
+              <div className="text-slate-300">Clients</div>
+            </div>
+
+            <div className="rounded-2xl bg-slate-900/70 p-6">
+              <div className="text-3xl font-black text-amber-400">180+</div>
+              <div className="text-slate-300">Trade Routes</div>
+            </div>
           </div>
 
           <div className="mt-10 flex gap-3">
@@ -121,7 +152,6 @@ export default function Hero() {
                     ? "w-10 bg-amber-400"
                     : "w-3 bg-white/40"
                 }`}
-                aria-label={`Slide ${index + 1}`}
               />
             ))}
           </div>

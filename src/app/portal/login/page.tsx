@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function LoginPage() {
@@ -11,9 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(
-    e: React.FormEvent
-  ) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     setLoading(true);
@@ -31,50 +30,161 @@ export default function LoginPage() {
       return;
     }
 
+
+      try {
+        const {
+          data: { user },
+        } = await supabaseBrowser.auth.getUser();
+
+        if (user) {
+          await fetch("/api/onboarding/bootstrap", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: user.id,
+              email: user.email,
+              companyName: user.user_metadata?.companyName || "MarineTraffic Customer",
+            }),
+          });
+        }
+      } catch (e) {
+        console.error("Onboarding bootstrap failed", e);
+      }
+
     router.push("/portal");
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-      <div className="w-full max-w-md rounded-3xl border bg-white p-10">
-        <h1 className="text-4xl font-black">
-          Client Login
-        </h1>
+    <main className="min-h-screen bg-slate-950">
+      <div className="grid min-h-screen lg:grid-cols-2">
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 space-y-4"
+        <div
+          className="relative hidden lg:flex"
+          style={{
+            backgroundImage:
+              "url('/images/logistics/ports/port-city.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         >
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-            className="w-full rounded-xl border px-4 py-3"
-          />
+          <div className="absolute inset-0 bg-slate-950/85" />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-            className="w-full rounded-xl border px-4 py-3"
-          />
+          <div className="relative flex w-full flex-col justify-center p-12">
+            <div className="inline-flex w-fit rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] text-cyan-400">
+              Bandari Salama ERP
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-amber-500 py-3 font-bold"
-          >
-            {loading
-              ? "Signing In..."
-              : "Sign In"}
-          </button>
-        </form>
+            <h1 className="mt-8 text-5xl font-black text-white">
+              Secure Client
+              <br />
+              Access Portal
+            </h1>
+
+            <p className="mt-6 max-w-xl text-lg text-slate-300">
+              Access your shipment tracking, customs services,
+              document repository, quotations and ERP dashboard.
+            </p>
+
+            <div className="mt-10 space-y-4">
+              {[
+                "Shipment Tracking",
+                "Document Repository",
+                "Customs Processing",
+                "Client Dashboard",
+                "Trade Services",
+                "Cargo Visibility",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-slate-200"
+                >
+                  ✓ {item}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+              <p className="text-sm text-cyan-300">
+                Looking for trade intelligence, investment
+                opportunities, finance resources and business
+                research?
+              </p>
+
+              <Link
+                href="/bandari-salama"
+                className="mt-3 inline-block font-bold text-cyan-400 hover:text-cyan-300"
+              >
+                Open Bandari Salama Public Portal →
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center p-8">
+          <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-10 shadow-2xl">
+
+            <div className="mb-8">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-400">
+                Secure ERP Access
+              </p>
+
+              <h2 className="mt-3 text-4xl font-black text-white">
+                Sign In
+              </h2>
+
+              <p className="mt-3 text-slate-400">
+                Authorized clients can access ERP services,
+                shipments, documents and account information.
+              </p>
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              <input
+                type="email"
+                placeholder="Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+              />
+
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+              />
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-amber-500 py-3 font-bold text-slate-950 transition hover:bg-amber-400"
+              >
+                {loading ? "Signing In..." : "Sign In"}
+              </button>
+            </form>
+
+            <div className="mt-6 flex justify-between text-sm">
+              <Link
+                href="/bandari-salama"
+                className="text-slate-400 hover:text-white"
+              >
+                ← Public Portal
+              </Link>
+
+              <span className="text-amber-400">
+                Bandari Salama ERP
+              </span>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </main>
   );

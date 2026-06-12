@@ -1,0 +1,29 @@
+import { supabaseServer } from "@/lib/supabase/server";
+
+const COMPANY_ID = "11111111-1111-1111-1111-111111111111";
+
+export async function getCompanyProfile() {
+  const { data: company } = await supabaseServer
+    .from("companies")
+    .select("*")
+    .eq("id", COMPANY_ID)
+    .single();
+
+  const { data: subscription } = await supabaseServer
+    .from("subscriptions")
+    .select("*")
+    .eq("company_id", COMPANY_ID)
+    .single();
+
+  const { data: license } = await supabaseServer
+    .from("licenses")
+    .select("*")
+    .eq("company_id", COMPANY_ID)
+    .single();
+
+  return {
+    company,
+    subscription,
+    license,
+  };
+}
