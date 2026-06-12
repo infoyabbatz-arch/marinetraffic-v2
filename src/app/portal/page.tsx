@@ -6,12 +6,33 @@ import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import PortalSidebar from "@/components/portal/PortalSidebar";
 
+type Company = {
+  name?: string;
+  country?: string;
+  industry?: string;
+};
+
+type Subscription = {
+  plan?: string;
+  status?: string;
+  renewal_date?: string;
+};
+
+type License = {
+  status?: string;
+  max_users?: number;
+};
+
 export default function PortalPage() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
+  const [company, setCompany] = useState<Company | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [license, setLicense] = useState<License | null>(null);
 
   useEffect(() => {
-    async function loadUser() {
+    async function loadPortal() {
       const {
         data: { user },
       } = await supabaseBrowser.auth.getUser();
@@ -22,9 +43,43 @@ export default function PortalPage() {
       }
 
       setEmail(user.email || "");
+
+      const { data: orgUser } = await supabaseBrowser
+        .from("organization_users")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const orgUserRecord: any = orgUser;
+
+      if (!orgUserRecord?.company_id) return;
+
+      const companyId = orgUserRecord.company_id;
+
+      const { data: companyData } = await supabaseBrowser
+        .from("companies")
+        .select("*")
+        .eq("id", companyId)
+        .maybeSingle();
+
+      const { data: subscriptionData } = await supabaseBrowser
+        .from("subscriptions")
+        .select("*")
+        .eq("company_id", companyId)
+        .maybeSingle();
+
+      const { data: licenseData } = await supabaseBrowser
+        .from("licenses")
+        .select("*")
+        .eq("company_id", companyId)
+        .maybeSingle();
+
+      setCompany(companyData);
+      setSubscription(subscriptionData);
+      setLicense(licenseData);
     }
 
-    loadUser();
+    loadPortal();
   }, [router]);
 
   return (
@@ -34,39 +89,73 @@ export default function PortalPage() {
           <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
             <PortalSidebar />
 
-            <div>
+            <div className="space-y-6">
+
               <div className="rounded-3xl bg-white p-8 shadow-sm">
                 <h1 className="text-4xl font-black">
                   MarineTraffic SaaS Portal
                 </h1>
 
-                <p className="mt-3 text-slate-600">
-                  Recovery Dashboard
+                <p className="mt-2 text-slate-600">
+                  Logged in as {email}
                 </p>
+              </div>
 
-                <div className="mt-6 rounded-xl border p-4">
-                  <p className="text-sm text-slate-500">
-                    Logged in as
-                  </p>
+              <div className="grid gap-6 md:grid-cols-3">
 
-                  <p className="mt-1 font-bold">
-                    {email || "Loading..."}
-                  </p>
-                </div>
-
-                <div className="mt-8 rounded-xl border border-amber-300 bg-amber-50 p-6">
-                  <h2 className="text-xl font-bold">
-                    Portal Recovery Mode
+                <div className="rounded-3xl bg-white p-6 shadow-sm">
+                  <h2 className="font-black text-xl">
+                    Company
                   </h2>
 
-                  <p className="mt-2">
-                    Authentication is active.
-                    Legacy logistics tables have been temporarily bypassed.
+                  <p className="mt-4">
+                    {company?.name || "No company linked"}
+                  </p>
+
+                  <p className="text-sm text-slate-500">
+                    {company?.industry || "-"}
+                  </p>
+
+                  <p className="text-sm text-slate-500">
+                    {company?.country || "-"}
                   </p>
                 </div>
-              </div>
-            </div>
 
+                <div className="rounded-3xl bg-white p-6 shadow-sm">
+                  <h2 className="font-black text-xl">
+                    Subscription
+                  </h2>
+
+                  <p className="mt-4">
+                    Plan: {subscription?.plan || "-"}
+                  </p>
+
+                  <p>
+                    Status: {subscription?.status || "-"}
+                  </p>
+
+                  <p>
+                    Renewal: {subscription?.renewal_date || "-"}
+                  </p>
+                </div>
+
+                <div className="rounded-3xl bg-white p-6 shadow-sm">
+                  <h2 className="font-black text-xl">
+                    License
+                  </h2>
+
+                  <p className="mt-4">
+                    Status: {license?.status || "-"}
+                  </p>
+
+                  <p>
+                    Max Users: {license?.max_users || 0}
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
           </div>
         </div>
       </main>
