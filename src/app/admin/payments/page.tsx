@@ -61,7 +61,9 @@ export default function AdminPaymentsPage() {
                 <p><b>Method:</b> {payment.payment_method}</p>
                 <p><b>Reference:</b> {payment.transaction_reference}</p>
                 <p><b>Payer:</b> {payment.payer_name}</p>
-                <p><b>Phone:</b> {payment.payer_phone}</p>
+                <p><b>ID:</b> {payment.id}</p>
+<p><b>Company:</b> {payment.company_id}</p>
+<p><b>Phone:</b> {payment.payer_phone}</p>
               </div>
 
               <div>
