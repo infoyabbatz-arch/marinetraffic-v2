@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function PaymentPage() {
 
@@ -10,8 +11,25 @@ export default function PaymentPage() {
 const [companyId,setCompanyId] = useState("");
 
 useEffect(()=>{
-  const id = localStorage.getItem("companyId") || "";
-  setCompanyId(id);
+  async function loadCompany(){
+    const {
+      data:{user}
+    } = await supabase.auth.getUser();
+
+    if(!user) return;
+
+    const { data: membership } = await supabase
+      .from("organization_users")
+      .select("company_id")
+      .eq("user_id", user.id)
+      .single();
+
+    if(membership?.company_id){
+      setCompanyId(membership.company_id);
+    }
+  }
+
+  loadCompany();
 },[]);
 
 
