@@ -10,35 +10,62 @@ export async function POST(req: Request) {
   try {
     const { paymentId } = await req.json();
 
-    const { data: payment, error } = await supabase
+    const { data: payment } = await supabase
       .from("payments")
       .select("*")
       .eq("id", paymentId)
       .single();
 
-    console.log("PAYMENT_ID", paymentId);
-    console.log("PAYMENT_DATA", payment);
-    console.log("PAYMENT_ERROR", error);
-
     if (!payment) {
       return NextResponse.json(
-        {
-          success:false,
-          error:"Payment not found",
-          debug:error
-        },
+        { success:false, error:"Payment not found" },
         { status:404 }
       );
     }
 
+    const renewal = new Date();
+    renewal.setFullYear(renewal.getFullYear() + 1);
+
+    await supabase
+      .from("payments")
+      .update({
+        status:"approved",
+        approved_at:new Date().toISOString(),
+        approved_by:"admin"
+      })
+      .eq("id", paymentId);
+
+    await supabase
+      .from("subscriptions")
+      .update({
+        status:"active",
+        renewal_date: renewal.toISOString().slice(0,10)
+      })
+      .eq("company_id", payment.company_id);
+
+    await supabase
+      .from("licenses")
+      .update({
+        status:"active"
+      })
+      .eq("company_id", payment.company_id);
+
+    await supabase
+      .from("audit_logs")
+      .insert({
+        company_id: payment.company_id,
+        action: "payment_approved",
+        performed_by: "admin"
+      });
+
     return NextResponse.json({
       success:true,
-      payment
+      approved:true
     });
 
   } catch (e:any) {
     return NextResponse.json(
-      { success:false,error:e.message },
+      { success:false, error:e.message },
       { status:500 }
     );
   }
