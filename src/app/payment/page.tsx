@@ -9,6 +9,7 @@ export default function PaymentPage() {
  const [payerName,setPayerName] = useState("");
  const [payerPhone,setPayerPhone] = useState("");
 const [companyId,setCompanyId] = useState("");
+const [proofFile,setProofFile] = useState<File | null>(null);
 
 useEffect(()=>{
   async function loadCompany(){
@@ -33,9 +34,36 @@ useEffect(()=>{
 },[]);
 
 
- async function submitPayment() {
+ 
+async function uploadProof() {
+  if(!proofFile) return null;
 
-   await fetch("/api/payments/submit",{
+  const fileName =
+    Date.now() + "-" + proofFile.name.replace(/\s+/g,"-");
+
+  const { error } = await supabase.storage
+    .from("payment-proofs")
+    .upload(fileName, proofFile, {
+      upsert: true
+    });
+
+  if(error){
+    console.error(error);
+    return null;
+  }
+
+  const { data } = supabase.storage
+    .from("payment-proofs")
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
+}
+
+async function submitPayment() {
+
+   const proofUrl = await uploadProof();
+
+await fetch("/api/payments/submit",{
      method:"POST",
      headers:{ "Content-Type":"application/json" },
      body:JSON.stringify({
@@ -45,7 +73,7 @@ useEffect(()=>{
        reference,
        payerName,
        payerPhone,
-       proofUrl:null
+       proofUrl
      })
    });
 
@@ -114,7 +142,14 @@ Baada ya kufanya malipo, jaza taarifa hapa chini na bonyeza Submit Payment For A
            onChange={(e)=>setPayerPhone(e.target.value)}
          />
 
-         <button
+         <input
+type="file"
+accept=".jpg,.jpeg,.png,.pdf"
+className="w-full rounded p-3 bg-white text-black border border-slate-300"
+onChange={(e)=>setProofFile(e.target.files?.[0] || null)}
+/>
+
+<button
            onClick={submitPayment}
            className="bg-amber-500 text-black px-8 py-3 rounded font-bold"
          >
