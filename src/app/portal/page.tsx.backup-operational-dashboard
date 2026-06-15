@@ -1,0 +1,220 @@
+"use client";
+
+import AuthGuard from "@/components/auth/AuthGuard";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { supabaseBrowser } from "@/lib/supabase/browser";
+
+export default function PortalPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState<any>(null);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [license, setLicense] = useState<any>(null);
+  const [activeUsers, setActiveUsers] = useState(1);
+
+  useEffect(() => {
+    async function load() {
+      const {
+        data: { user },
+      } = await supabaseBrowser.auth.getUser();
+
+      if (!user) {
+        router.push("/portal/login");
+        return;
+      }
+
+      setEmail(user.email || "");
+
+      const { data: orgUser } = await supabaseBrowser
+        .from("organization_users")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const companyId = (orgUser as any)?.company_id;
+
+      if (!companyId) return;
+
+      const { count } = await supabaseBrowser
+        .from("organization_users")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("company_id", companyId);
+
+      setActiveUsers(count || 1);
+
+      const { data: companyData } = await supabaseBrowser
+        .from("companies")
+        .select("*")
+        .eq("id", companyId)
+        .maybeSingle();
+
+      const { data: subscriptionData } = await supabaseBrowser
+        .from("subscriptions")
+        .select("*")
+        .eq("company_id", companyId)
+        .maybeSingle();
+
+      const { data: licenseData } = await supabaseBrowser
+        .from("licenses")
+        .select("*")
+        .eq("company_id", companyId)
+        .maybeSingle();
+
+      setCompany(companyData);
+      setSubscription(subscriptionData);
+      setLicense(licenseData);
+    }
+
+    load();
+  }, [router]);
+
+  const seatsAvailable =
+    (license?.max_users || 2) - activeUsers;
+
+  return (
+    <AuthGuard>
+      <div className="space-y-6">
+
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 className="text-5xl font-black">
+            Dashboard
+          </h1>
+
+          <p className="mt-2 text-slate-500">
+            Welcome back, {email}
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-4">
+
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <h3 className="font-bold">
+              Active Users
+            </h3>
+            <div className="mt-2 text-5xl font-black">
+              {activeUsers}
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <h3 className="font-bold">
+              Seats Available
+            </h3>
+            <div className="mt-2 text-5xl font-black">
+              {seatsAvailable}
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <h3 className="font-bold">
+              License Limit
+            </h3>
+            <div className="mt-2 text-5xl font-black">
+              {license?.max_users || 2}
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <h3 className="font-bold">
+              Company
+            </h3>
+
+            <p className="mt-3 font-semibold">
+              {company?.name || "-"}
+            </p>
+
+            <p className="text-sm text-slate-500">
+              {company?.industry || "-"}
+            </p>
+          </div>
+
+        </div>
+
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h2 className="text-2xl font-black">
+            Subscription & License Summary
+          </h2>
+
+          <div className="mt-6 grid gap-6 md:grid-cols-5">
+
+            <div>
+              <p className="text-slate-500">Plan</p>
+              <p className="font-bold">
+                {subscription?.plan || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-slate-500">Status</p>
+              <p className="font-bold">
+                {subscription?.status || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-slate-500">License</p>
+              <p className="font-bold">
+                {license?.status || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-slate-500">Renewal</p>
+              <p className="font-bold">
+                {subscription?.renewal_date || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-slate-500">Max Users</p>
+              <p className="font-bold">
+                {license?.max_users || 2}
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+
+          <div className="rounded-3xl bg-white p-8 shadow-sm">
+            <h2 className="text-2xl font-black">
+              Quick Access
+            </h2>
+
+            <div className="mt-6 grid grid-cols-2 gap-4">
+
+              <Link href="/portal/team">Team</Link>
+              <Link href="/portal/customers">Customers</Link>
+              <Link href="/portal/billing">Billing</Link>
+              <Link href="/portal/reports">Reports</Link>
+              <Link href="/portal/documents">Documents</Link>
+              <Link href="/portal/tracking">Tracking</Link>
+
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white p-8 shadow-sm">
+            <h2 className="text-2xl font-black">
+              Recent Activity
+            </h2>
+
+            <div className="mt-6 space-y-4">
+              <div>Account created successfully</div>
+              <div>License activated</div>
+              <div>Subscription started</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </AuthGuard>
+  );
+}

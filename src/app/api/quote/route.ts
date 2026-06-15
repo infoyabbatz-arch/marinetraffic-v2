@@ -27,17 +27,8 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    const smtpConfigured = false;
 
-    await transporter.verify();
 
     const reference =
       "MT-" + Date.now().toString().slice(-8);
@@ -134,68 +125,51 @@ export async function POST(req: Request) {
       }
     }
 
-    await transporter.sendMail({
-      from: process.env.MAIL_FROM,
-      to: process.env.MAIL_TO,
-      subject: `Quotation Request ${reference}`,
-      attachments,
-      html: `
-        <h2>MarineTraffic Group</h2>
+      
+const { data: customer } = await supabaseServer
+  .from("customers")
+  .select("id")
+  .eq("email", email)
+  .maybeSingle();
 
-        <p>
-          <strong>Reference:</strong>
-          ${reference}
-        </p>
+const customerId = customer?.id ?? null;
 
-        <p><strong>Company:</strong> ${companyName}</p>
-        <p><strong>Contact:</strong> ${contactPerson}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
+// EMAIL COMPLETELY DISABLED
 
-        <hr/>
-
-        <p><strong>Origin:</strong> ${origin}</p>
-        <p><strong>Destination:</strong> ${destination}</p>
-        <p><strong>Cargo Type:</strong> ${cargoType}</p>
-        <p><strong>Weight:</strong> ${weight}</p>
-
-        <p><strong>Description:</strong></p>
-        <p>${description}</p>
-
-        <hr/>
-
-        <ul>
-          ${uploadedFiles
-            .map((file) => `<li>${file}</li>`)
-            .join("")}
-        </ul>
-      `,
-    });
-
-    if (email) {
-      await transporter.sendMail({
-        from: process.env.MAIL_FROM,
-        to: email,
-        subject:
-          `MarineTraffic Quote Request Received (${reference})`,
-        html: `
-          <h2>Thank You</h2>
-
-          <p>
-            We have received your quotation request.
-          </p>
-
-          <p>
-            Reference:
-            <strong>${reference}</strong>
-          </p>
-
-          <p>
-            Our team will contact you shortly.
-          </p>
-        `,
+    const { error: quoteError } = await supabaseServer
+      .from("quotes")
+      .insert({
+        reference,
+        company_name: companyName,
+        contact_person: contactPerson,
+        email,
+        phone,
+        origin,
+        destination,
+        cargo_type: cargoType,
+        weight,
+        description,
+        status: "pending",
+          customer_id: customerId,
       });
+
+    if (quoteError) {
+      console.error("QUOTE SAVE ERROR:", quoteError);
+
+      return NextResponse.json(
+        {
+          success: false,
+          source: "quotes_insert",
+          message: quoteError.message,
+          details: quoteError,
+        },
+        {
+          status: 500,
+        }
+      );
     }
+
+    console.log("QUOTE SAVED:", reference);
 
     return NextResponse.json({
       success: true,

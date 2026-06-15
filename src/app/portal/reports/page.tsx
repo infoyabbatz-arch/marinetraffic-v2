@@ -1,84 +1,117 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+
 export default function ReportsPage() {
+
+  const [customers,setCustomers] = useState(0);
+  const [documents,setDocuments] = useState(0);
+  const [team,setTeam] = useState(0);
+  const [invites,setInvites] = useState(0);
+
+  useEffect(() => {
+
+    async function load() {
+
+      const { count: customerCount } =
+        await supabase
+          .from("customers")
+          .select("*",{count:"exact",head:true});
+
+      const { count: documentCount } =
+        await supabase
+          .from("documents")
+          .select("*",{count:"exact",head:true});
+
+      const { count: inviteCount } =
+        await supabase
+          .from("staff_invitations")
+          .select("*",{count:"exact",head:true});
+
+      setCustomers(customerCount || 0);
+      setDocuments(documentCount || 0);
+      setInvites(inviteCount || 0);
+
+      setTeam(1 + (inviteCount || 0));
+    }
+
+    load();
+
+  },[]);
+
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-8">
+    <main className="min-h-screen bg-slate-100 p-8">
+      <div className="mx-auto max-w-7xl space-y-8">
 
-      <div className="mx-auto max-w-7xl">
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 className="text-5xl font-black">
+            Reports Center
+          </h1>
 
-        <h1 className="text-5xl font-black text-cyan-400">
-          Executive Reports Center
-        </h1>
+          <p className="mt-2 text-slate-500">
+            Bandari Salama ERP™ analytics dashboard.
+          </p>
+        </div>
 
-        <p className="mt-3 text-slate-400">
-          Enterprise analytics, KPIs and operational intelligence.
-        </p>
+        <div className="grid gap-6 md:grid-cols-4">
 
-        <div className="mt-10 grid gap-6 md:grid-cols-4">
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="text-slate-500">
+              Customers
+            </div>
 
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">Revenue</div>
-            <div className="mt-2 text-4xl font-black text-emerald-400">
-              $248K
+            <div className="text-5xl font-black mt-2">
+              {customers}
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">Shipments</div>
-            <div className="mt-2 text-4xl font-black text-cyan-400">
-              184
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="text-slate-500">
+              Documents
+            </div>
+
+            <div className="text-5xl font-black mt-2">
+              {documents}
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">Customers</div>
-            <div className="mt-2 text-4xl font-black text-amber-400">
-              56
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="text-slate-500">
+              Team
+            </div>
+
+            <div className="text-5xl font-black mt-2">
+              {team}
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">Growth</div>
-            <div className="mt-2 text-4xl font-black text-purple-400">
-              +34%
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="text-slate-500">
+              Invitations
+            </div>
+
+            <div className="text-5xl font-black mt-2">
+              {invites}
             </div>
           </div>
 
         </div>
 
-        <div className="mt-10 rounded-3xl bg-slate-900 p-8">
-
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
           <h2 className="text-3xl font-black">
-            Executive KPI Summary
+            System Summary
           </h2>
 
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-
-            <div className="rounded-2xl border border-slate-800 p-5">
-              Top Customer Revenue
-              <div className="mt-2 text-2xl font-black text-amber-400">
-                $84K
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 p-5">
-              Active Cargo
-              <div className="mt-2 text-2xl font-black text-cyan-400">
-                89 Containers
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 p-5">
-              Monthly Profit
-              <div className="mt-2 text-2xl font-black text-emerald-400">
-                $42K
-              </div>
-            </div>
-
+          <div className="mt-6 space-y-3">
+            <div>✓ Customer Registry Active</div>
+            <div>✓ Document Registry Active</div>
+            <div>✓ Team Management Active</div>
+            <div>✓ Subscription Management Active</div>
           </div>
-
         </div>
 
       </div>
-
     </main>
   );
 }

@@ -1,117 +1,194 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+
 export default function CustomersPage() {
-  const customers = [
-    {
-      name: "East Africa Logistics",
-      country: "Tanzania",
-      status: "Active",
-      revenue: "$24,500",
-    },
-    {
-      name: "Global Freight Ltd",
-      country: "Kenya",
-      status: "Active",
-      revenue: "$18,200",
-    },
-    {
-      name: "Indian Ocean Trade",
-      country: "UAE",
-      status: "Pending",
-      revenue: "$7,800",
-    },
-  ];
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+
+  const [companyName, setCompanyName] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  async function loadCustomers() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data: membership } = await supabase
+      .from("organization_users")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!membership) return;
+
+    const { data } = await supabase
+      .from("customers")
+      .select("*")
+      .eq("company_id", membership.company_id)
+      .order("created_at", { ascending: false });
+
+    setCustomers(data || []);
+  }
+
+  async function addCustomer() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data: membership } = await supabase
+      .from("organization_users")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!membership) return;
+
+    const { error } = await supabase
+      .from("customers")
+      .insert({
+        company_id: membership.company_id,
+        company_name: companyName,
+        contact_person: contactPerson,
+        email,
+        phone,
+        country,
+        status: "active",
+      });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setCompanyName("");
+    setContactPerson("");
+    setEmail("");
+    setPhone("");
+    setCountry("");
+
+    await loadCustomers();
+  }
+
+  const filtered = customers.filter((c) =>
+    c.company_name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-8">
+    <div className="space-y-6">
 
-      <div className="max-w-7xl mx-auto">
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <h1 className="text-5xl font-black">
+          Customers
+        </h1>
+        <p className="mt-3 text-slate-500">
+          Manage customer companies and contacts.
+        </p>
+      </div>
 
-        <div className="flex items-center justify-between">
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <h2 className="text-3xl font-black mb-6">
+          Add Customer
+        </h2>
 
-          <div>
-            <h1 className="text-5xl font-black text-cyan-400">
-              Customer Management
-            </h1>
+        <div className="grid gap-4 md:grid-cols-2">
+          <input
+            className="border rounded-xl p-3"
+            placeholder="Company Name"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+          />
 
-            <p className="mt-3 text-slate-400">
-              Manage enterprise customers, accounts and revenue.
-            </p>
-          </div>
+          <input
+            className="border rounded-xl p-3"
+            placeholder="Contact Person"
+            value={contactPerson}
+            onChange={(e) => setContactPerson(e.target.value)}
+          />
 
-          <button className="rounded-xl bg-amber-500 px-5 py-3 font-bold text-slate-950">
-            Add Customer
-          </button>
+          <input
+            className="border rounded-xl p-3"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
+          <input
+            className="border rounded-xl p-3"
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+
+          <input
+            className="border rounded-xl p-3"
+            placeholder="Country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+          />
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-4">
+        <button
+          onClick={addCustomer}
+          className="mt-6 rounded-xl bg-slate-900 px-6 py-3 text-white font-bold"
+        >
+          Add Customer
+        </button>
+      </div>
 
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">Customers</div>
-            <div className="mt-2 text-4xl font-black text-cyan-400">128</div>
-          </div>
-
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">Active</div>
-            <div className="mt-2 text-4xl font-black text-emerald-400">114</div>
-          </div>
-
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">Pending</div>
-            <div className="mt-2 text-4xl font-black text-amber-400">14</div>
-          </div>
-
-          <div className="rounded-2xl bg-slate-900 p-6">
-            <div className="text-slate-400">MRR</div>
-            <div className="mt-2 text-4xl font-black text-purple-400">$48K</div>
-          </div>
-
-        </div>
-
-        <div className="mt-10 rounded-3xl bg-slate-900 p-8">
-
-          <h2 className="text-2xl font-black">
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-black">
             Customer Directory
           </h2>
 
-          <div className="mt-6 space-y-4">
-
-            {customers.map((customer) => (
-              <div
-                key={customer.name}
-                className="rounded-2xl border border-slate-800 p-5"
-              >
-                <div className="flex items-center justify-between">
-
-                  <div>
-                    <div className="font-bold text-xl">
-                      {customer.name}
-                    </div>
-
-                    <div className="text-slate-400">
-                      {customer.country}
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="font-bold text-cyan-400">
-                      {customer.revenue}
-                    </div>
-
-                    <div className="text-slate-400">
-                      {customer.status}
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            ))}
-
-          </div>
-
+          <input
+            className="border rounded-xl p-3 w-72"
+            placeholder="Search customer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="p-3 text-left">Company</th>
+              <th className="p-3 text-left">Contact</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Phone</th>
+              <th className="p-3 text-left">Country</th>
+              <th className="p-3 text-left">Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filtered.map((customer) => (
+              <tr key={customer.id} className="border-b">
+                <td className="p-3">{customer.company_name}</td>
+                <td className="p-3">{customer.contact_person}</td>
+                <td className="p-3">{customer.email}</td>
+                <td className="p-3">{customer.phone}</td>
+                <td className="p-3">{customer.country}</td>
+                <td className="p-3">{customer.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-    </main>
+    </div>
   );
 }

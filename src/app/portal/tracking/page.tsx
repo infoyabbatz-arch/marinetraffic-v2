@@ -1,126 +1,170 @@
 "use client";
 
-import AuthGuard from "@/components/auth/AuthGuard";
-
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabase/browser";
-import PortalSidebar from "@/components/portal/PortalSidebar";
+import { supabase } from "@/lib/supabase/client";
 
-type TrackingEvent = {
-  id: string;
-  event_date: string;
-  event_title: string;
-  location: string;
-};
+export default function TrackingPage() {
 
-export default function PortalTrackingPage() {
-  const router = useRouter();
+  const [shipments,setShipments] = useState<any[]>([]);
+  const [customers,setCustomers] = useState<any[]>([]);
 
-  const [events, setEvents] = useState<TrackingEvent[]>([]);
+  const [trackingNumber,setTrackingNumber] = useState("");
+  const [customerId,setCustomerId] = useState("");
+  const [origin,setOrigin] = useState("");
+  const [destination,setDestination] = useState("");
 
-  useEffect(() => {
-    async function loadEvents() {
-      const {
-        data: { user },
-      } = await supabaseBrowser.auth.getUser();
+  async function loadData() {
 
-      if (!user) {
-          router.push("/portal/login");
-          return;
-        }
+    const { data: shipmentData } =
+      await supabase
+        .from("shipments")
+        .select("*")
+        .order("created_at",{ascending:false});
 
-      const { data: customer } = await supabaseBrowser
+    const { data: customerData } =
+      await supabase
         .from("customers")
         .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+        .order("company_name");
 
-      const customerRecord: any = customer;
+    setShipments(shipmentData || []);
+    setCustomers(customerData || []);
+  }
 
-      if (!customerRecord) return;
+  useEffect(()=>{
+    loadData();
+  },[]);
 
-      const { data: quotes } = await supabaseBrowser
-        .from("quotes")
-        .select("id")
-        .eq("customer_id", customerRecord.id);
+  async function createShipment() {
 
-      const quoteIds = ((quotes as any[]) || []).map((q: any) => q.id);
-
-      if (quoteIds.length === 0) {
-        setEvents([]);
-        return;
-      }
-
-      const { data: shipments } = await supabaseBrowser
-        .from("shipments")
-        .select("id")
-        .in("quote_id", quoteIds);
-
-      const shipmentIds = ((shipments as any[]) || []).map((s: any) => s.id);
-
-      if (shipmentIds.length === 0) {
-        setEvents([]);
-        return;
-      }
-
-      const { data } = await supabaseBrowser
-        .from("tracking_events")
-        .select("*")
-        .in("shipment_id", shipmentIds)
-        .order("event_date", {
-          ascending: false,
-        });
-
-      setEvents(data || []);
+    if(!trackingNumber){
+      alert("Enter tracking number");
+      return;
     }
 
-    loadEvents();
-  }, []);
+    const { error } =
+      await supabase
+        .from("shipments")
+        .insert({
+          tracking_number: trackingNumber,
+          customer_id: customerId || null,
+          origin,
+          destination,
+          status: "pending",
+            company_id: customers.find(c=>c.id===customerId)?.company_id || null
+        } as any);
+
+    if(error){
+      alert(error.message);
+      return;
+    }
+
+    setTrackingNumber("");
+    setCustomerId("");
+    setOrigin("");
+    setDestination("");
+
+    loadData();
+
+    alert("Shipment created");
+  }
 
   return (
-    <AuthGuard>
-<main className="min-h-screen bg-slate-100">
-      <div className="mx-auto max-w-7xl p-6">
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <PortalSidebar />
+    <main className="min-h-screen bg-slate-100 p-8">
+      <div className="mx-auto max-w-7xl space-y-8">
 
-          <div>
-            <h1 className="text-4xl font-black">
-              Tracking History
-            </h1>
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 className="text-5xl font-black">
+            Tracking Center
+          </h1>
 
-            <div className="mt-8 space-y-4">
-              {events.map((event) => (
-                <div
-                  key={event.id}
-                  className="rounded-xl border bg-white p-5"
-                >
-                  <p className="font-bold">
-                    {event.event_title}
-                  </p>
+          <p className="mt-2 text-slate-500">
+            Shipment and cargo tracking management.
+          </p>
+        </div>
 
-                  <p className="mt-2 text-slate-600">
-                    {event.location}
-                  </p>
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h2 className="text-3xl font-black mb-4">
+            Create Shipment
+          </h2>
 
-                  <p className="mt-2 text-sm text-slate-500">
-                    {new Date(event.event_date).toLocaleString()}
-                  </p>
-                </div>
+          <div className="grid gap-4 md:grid-cols-2">
+
+            <input
+              value={trackingNumber}
+              onChange={(e)=>setTrackingNumber(e.target.value)}
+              placeholder="Tracking Number"
+              className="rounded-xl border p-3"
+            />
+
+            <select
+              value={customerId}
+              onChange={(e)=>setCustomerId(e.target.value)}
+              className="rounded-xl border p-3"
+            >
+              <option value="">Select Customer</option>
+
+              {customers.map((c)=>(
+                <option key={c.id} value={c.id}>
+                  {c.company_name}
+                </option>
               ))}
+            </select>
 
-              {events.length === 0 && (
-                <div className="rounded-xl border bg-white p-5">
-                  No tracking events found.
-                </div>
-              )}
-            </div>
+            <input
+              value={origin}
+              onChange={(e)=>setOrigin(e.target.value)}
+              placeholder="Origin"
+              className="rounded-xl border p-3"
+            />
+
+            <input
+              value={destination}
+              onChange={(e)=>setDestination(e.target.value)}
+              placeholder="Destination"
+              className="rounded-xl border p-3"
+            />
+
           </div>
 
+          <button
+            onClick={createShipment}
+            className="mt-4 rounded-xl bg-slate-900 px-6 py-3 text-white"
+          >
+            Create Shipment
+          </button>
         </div>
+
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h2 className="text-3xl font-black mb-4">
+            Shipment Registry
+          </h2>
+
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3 text-left">Tracking</th>
+                <th className="p-3 text-left">Origin</th>
+                <th className="p-3 text-left">Destination</th>
+                <th className="p-3 text-left">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {shipments.map((s)=>(
+                <tr key={s.id} className="border-b">
+                  <td className="p-3">{s.tracking_number}</td>
+                  <td className="p-3">{s.origin}</td>
+                  <td className="p-3">{s.destination}</td>
+                  <td className="p-3">{s.status}</td>
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+        </div>
+
       </div>
     </main>
-</AuthGuard>
   );
 }

@@ -1,127 +1,182 @@
 "use client";
 
-import AuthGuard from "@/components/auth/AuthGuard";
-
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabase/browser";
-import PortalSidebar from "@/components/portal/PortalSidebar";
-
-type Document = {
-  id: string;
-  document_type: string;
-  file_url: string;
-  uploaded_at: string;
-};
+import { supabase } from "@/lib/supabase/client";
 
 export default function DocumentsPage() {
-  const router = useRouter();
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documentName, setDocumentName] = useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [category, setCategory] = useState("Invoice");
+
+  async function loadDocuments() {
+    const { data } = await supabase
+      .from("documents")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    setDocuments(data || []);
+  }
 
   useEffect(() => {
-    async function loadDocuments() {
-      const {
-        data: { user },
-      } = await supabaseBrowser.auth.getUser();
+    loadDocuments();
 
-      if (!user) {
-          router.push("/portal/login");
-          return;
-        }
-
-      const { data: customer } = await supabaseBrowser
+    async function loadCustomers() {
+      const { data } = await supabase
         .from("customers")
         .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+        .order("company_name");
 
-      const customerRecord: any = customer;
-
-      if (!customerRecord) return;
-
-      const { data: quotes } = await supabaseBrowser
-        .from("quotes")
-        .select("id")
-        .eq("customer_id", customerRecord.id);
-
-      const quoteIds = ((quotes as any[]) || []).map((q: any) => q.id);
-
-      if (quoteIds.length === 0) {
-        setDocuments([]);
-        return;
-      }
-
-      const { data: shipments } = await supabaseBrowser
-        .from("shipments")
-        .select("id")
-        .in("quote_id", quoteIds);
-
-      const shipmentIds = ((shipments as any[]) || []).map((s: any) => s.id);
-
-      if (shipmentIds.length === 0) {
-        setDocuments([]);
-        return;
-      }
-
-      const { data } = await supabaseBrowser
-        .from("documents")
-        .select("*")
-        .in("shipment_id", shipmentIds);
-
-      setDocuments(data || []);
+      setCustomers(data || []);
     }
 
-    loadDocuments();
+    loadCustomers();
   }, []);
 
+  const filtered = documents.filter((d) =>
+    (d.document_name || "")
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+  async function createDocument() {
+    if (!documentName) {
+      alert("Enter document name");
+      return;
+    }
+
+    const payload = {
+      customer_id: customerId || null,
+      document_name: documentName,
+      category,
+      status: "active",
+        company_id: customers.find(c=>c.id===customerId)?.company_id || null
+    };
+
+    const { error } = await supabase
+      .from("documents")
+      .insert(payload as any);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setDocumentName("");
+    loadDocuments();
+
+    alert("Document created");
+  }
+
+
   return (
-    <AuthGuard>
-<main className="min-h-screen bg-slate-100">
-      <div className="mx-auto max-w-7xl p-6">
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <PortalSidebar />
+    <main className="min-h-screen bg-slate-100 p-8">
+      <div className="mx-auto max-w-7xl space-y-8">
 
-          <div>
-            <h1 className="text-4xl font-black">
-              Documents
-            </h1>
-
-            <div className="mt-8 space-y-4">
-              {documents.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="rounded-xl border bg-white p-5"
-                >
-                  <p className="font-bold">
-                    {doc.document_type}
-                  </p>
-
-                  <p className="text-sm text-slate-500">
-                    {new Date(doc.uploaded_at).toLocaleString()}
-                  </p>
-
-                  <a
-                    href={doc.file_url}
-                    target="_blank"
-                    className="mt-2 inline-block text-blue-600"
-                  >
-                    Open Document
-                  </a>
-                </div>
-              ))}
-
-              {documents.length === 0 && (
-                <div className="rounded-xl border bg-white p-5">
-                  No documents found.
-                </div>
-              )}
-            </div>
-          </div>
-
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 className="text-5xl font-black">
+            Documents Registry
+          </h1>
+          <p className="mt-2 text-slate-500">
+            Bandari Salama ERP™ document management.
+          </p>
         </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search document..."
+            className="w-full rounded-xl border p-3"
+          />
+        </div>
+
+        
+<div className="rounded-3xl bg-white p-6 shadow-sm">
+  <h2 className="mb-4 text-3xl font-black">
+    Create Document
+  </h2>
+
+  <div className="grid gap-4 md:grid-cols-3">
+    <input
+      value={documentName}
+      onChange={(e)=>setDocumentName(e.target.value)}
+      placeholder="Document Name"
+      className="rounded-xl border p-3"
+    />
+
+    <select
+      value={customerId}
+      onChange={(e)=>setCustomerId(e.target.value)}
+      className="rounded-xl border p-3"
+    >
+      <option value="">Select Customer</option>
+      {customers.map((c)=>(
+        <option key={c.id} value={c.id}>
+          {c.company_name}
+        </option>
+      ))}
+    </select>
+
+    <select
+      value={category}
+      onChange={(e)=>setCategory(e.target.value)}
+      className="rounded-xl border p-3"
+    >
+      <option>Invoice</option>
+      <option>Customs Entry</option>
+      <option>Bill of Lading</option>
+      <option>Permit</option>
+      <option>Contract</option>
+    </select>
+  </div>
+
+  <button
+    onClick={createDocument}
+    className="mt-4 rounded-xl bg-slate-900 px-6 py-3 text-white"
+  >
+    Create Document
+  </button>
+</div>
+
+<div className="grid gap-4 md:grid-cols-5">
+          <div className="rounded-2xl bg-white p-4">Invoice</div>
+          <div className="rounded-2xl bg-white p-4">Customs Entry</div>
+          <div className="rounded-2xl bg-white p-4">Bill of Lading</div>
+          <div className="rounded-2xl bg-white p-4">Permit</div>
+          <div className="rounded-2xl bg-white p-4">Contract</div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-3xl font-black">
+            Document Registry
+          </h2>
+
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3 text-left">Document</th>
+                <th className="p-3 text-left">Category</th>
+                <th className="p-3 text-left">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.map((doc) => (
+                <tr key={doc.id} className="border-b">
+                  <td className="p-3">{doc.document_name}</td>
+                  <td className="p-3">{doc.category}</td>
+                  <td className="p-3">{doc.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
       </div>
     </main>
-</AuthGuard>
   );
 }

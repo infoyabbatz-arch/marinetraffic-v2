@@ -5,7 +5,6 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import PortalSidebar from "@/components/portal/PortalSidebar";
 
 type Shipment = {
   id: string;
@@ -31,20 +30,20 @@ export default function ShipmentsPage() {
           return;
         }
 
-      const { data: customer } = await supabaseBrowser
-        .from("customers")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+        const { data: membership } = await supabaseBrowser
+          .from("organization_users")
+          .select("company_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      const customerRecord: any = customer;
+        const companyId = (membership as any)?.company_id;
 
-      if (!customerRecord) return;
+        if (!companyId) return;
 
       const { data: quotes } = await supabaseBrowser
         .from("quotes")
         .select("id")
-        .eq("customer_id", customerRecord.id);
+        .eq("company_id", companyId);
 
       const quoteIds = ((quotes as any[]) || []).map((q: any) => q.id);
 
@@ -69,7 +68,6 @@ export default function ShipmentsPage() {
 <main className="min-h-screen bg-slate-100">
       <div className="mx-auto max-w-7xl p-6">
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <PortalSidebar />
 
           <div>
             <h1 className="text-4xl font-black">
@@ -87,7 +85,7 @@ export default function ShipmentsPage() {
                   </p>
 
                   <p>
-                    {shipment.origin} → {shipment.destination}
+                    {shipment.origin} â {shipment.destination}
                   </p>
 
                   <p>

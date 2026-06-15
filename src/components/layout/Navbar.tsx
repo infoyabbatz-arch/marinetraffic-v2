@@ -59,7 +59,7 @@ export default function Navbar() {
               href="/bandari-salama"
               className="rounded-xl bg-amber-500 px-5 py-3 font-bold text-slate-900 hover:bg-amber-400 transition"
             >
-              Access Bandari Salama™
+              Bandari Salama ERP™
             </Link>
           </div>
 
@@ -96,7 +96,7 @@ export default function Navbar() {
                 href="/bandari-salama"
                 className="inline-flex w-fit rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-900"
               >
-                Access Bandari Salama™
+                Bandari Salama ERP™
               </Link>
             </div>
           </div>

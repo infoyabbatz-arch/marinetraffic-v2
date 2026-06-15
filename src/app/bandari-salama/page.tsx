@@ -35,29 +35,23 @@ export default function BandariSalamaPage() {
         <div className="mx-auto max-w-7xl px-6 py-24">
 
           <div className="inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] text-cyan-400">
-            Bandari Salama Public Intelligence Portal
+            Bandari Salama ERP™
           </div>
 
           <h1 className="mt-8 text-5xl font-black md:text-7xl">
-            Trade,
-            <br />
-            Intelligence &
-            <br />
-            Investment Hub
+            Bandari Salama ERP™
           </h1>
 
           <p className="mt-6 max-w-3xl text-lg text-slate-300">
-            Access East Africa trade intelligence, customs knowledge,
-            tax resources, logistics insights, investment opportunities,
-            market research and business intelligence from one platform.
+            Customs Operations, Freight Forwarding, Shipment Tracking, Customer Management, Billing, Trade Intelligence and Enterprise Resource Planning from one unified platform.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4">
             <Link
-              href="/portal/intelligence"
+              href="/portal/login"
               className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950"
             >
-              Open Intelligence Center
+              Login ERP™
             </Link>
 
             <Link
@@ -71,7 +65,26 @@ export default function BandariSalamaPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20">
+<section className="mx-auto max-w-7xl px-6 py-12">
+<div className="grid gap-6 md:grid-cols-4">
+<div className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 text-center"><div className="text-4xl font-black text-cyan-400">12,500+</div><div className="mt-2 text-slate-300">Shipments Managed</div></div>
+<div className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 text-center"><div className="text-4xl font-black text-cyan-400">1,000+</div><div className="mt-2 text-slate-300">Clients</div></div>
+<div className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 text-center"><div className="text-4xl font-black text-cyan-400">180+</div><div className="mt-2 text-slate-300">Trade Routes</div></div>
+<div className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 text-center"><div className="text-4xl font-black text-cyan-400">42+</div><div className="mt-2 text-slate-300">Countries Served</div></div>
+</div>
+</section>
+
+<section className="mx-auto max-w-7xl px-6 pb-12">
+<h2 className="text-4xl font-black text-cyan-400">ERP Quick Access</h2>
+<div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+<Link href="/portal/login" className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 font-black">ERP Login</Link>
+<Link href="/portal/tracking" className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 font-black">Shipment Tracking</Link>
+<Link href="/portal/documents" className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 font-black">Documents</Link>
+<Link href="/portal/quotes" className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 font-black">Quotations</Link>
+</div>
+</section>
+
+<section className="mx-auto max-w-7xl px-6 py-20">
         <h2 className="text-4xl font-black text-cyan-400">
           Intelligence Areas
         </h2>
@@ -129,7 +142,7 @@ export default function BandariSalamaPage() {
         <div className="rounded-3xl border border-amber-500/20 bg-slate-900 p-10">
 
           <h2 className="text-4xl font-black text-amber-400">
-            ERP Client Zone
+            Enterprise Resource Platform™
           </h2>
 
           <p className="mt-4 max-w-2xl text-slate-300">
@@ -142,7 +155,7 @@ export default function BandariSalamaPage() {
             href="/portal/login"
             className="mt-8 inline-block rounded-xl bg-amber-500 px-6 py-4 font-bold text-slate-950"
           >
-            Sign In to ERP Portal
+            Login ERP™
           </Link>
 
         </div>

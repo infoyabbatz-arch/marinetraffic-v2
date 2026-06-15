@@ -1,0 +1,88 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+
+export default function DocumentsPage() {
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+
+  async function loadDocuments() {
+    const { data } = await supabase
+      .from("documents")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    setDocuments(data || []);
+  }
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const filtered = documents.filter((d) =>
+    (d.document_name || "")
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+  return (
+    <main className="min-h-screen bg-slate-100 p-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 className="text-5xl font-black">
+            Documents Registry
+          </h1>
+          <p className="mt-2 text-slate-500">
+            Bandari Salama ERP™ document management.
+          </p>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search document..."
+            className="w-full rounded-xl border p-3"
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-5">
+          <div className="rounded-2xl bg-white p-4">Invoice</div>
+          <div className="rounded-2xl bg-white p-4">Customs Entry</div>
+          <div className="rounded-2xl bg-white p-4">Bill of Lading</div>
+          <div className="rounded-2xl bg-white p-4">Permit</div>
+          <div className="rounded-2xl bg-white p-4">Contract</div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-3xl font-black">
+            Document Registry
+          </h2>
+
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3 text-left">Document</th>
+                <th className="p-3 text-left">Category</th>
+                <th className="p-3 text-left">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.map((doc) => (
+                <tr key={doc.id} className="border-b">
+                  <td className="p-3">{doc.document_name}</td>
+                  <td className="p-3">{doc.category}</td>
+                  <td className="p-3">{doc.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,268 @@
+import { NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/supabase/server";
+import nodemailer from "nodemailer";
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
+const ALLOWED_EXTENSIONS = [
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".jpg",
+  ".jpeg",
+  ".png",
+];
+
+function isAllowedFile(filename: string) {
+  const lower = filename.toLowerCase();
+
+  return ALLOWED_EXTENSIONS.some((ext) =>
+    lower.endsWith(ext)
+  );
+}
+
+export async function POST(req: Request) {
+  try {
+    const formData = await req.formData();
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    
+const smtpConfigured =
+  process.env.SMTP_HOST &&
+  process.env.SMTP_USER &&
+  process.env.SMTP_PASS;
+
+if (smtpConfigured) {
+  await transporter.verify();
+}
+
+
+    const reference =
+      "MT-" + Date.now().toString().slice(-8);
+
+    const companyName =
+      String(formData.get("companyName") || "");
+
+    const contactPerson =
+      String(formData.get("contactPerson") || "");
+
+    const email =
+      String(formData.get("email") || "");
+
+    const phone =
+      String(formData.get("phone") || "");
+
+    const origin =
+      String(formData.get("origin") || "");
+
+    const destination =
+      String(formData.get("destination") || "");
+
+    const cargoType =
+      String(formData.get("cargoType") || "");
+
+    const weight =
+      String(formData.get("weight") || "");
+
+    const description =
+      String(formData.get("description") || "");
+
+    const uploadedFiles: string[] = [];
+
+    const attachments: {
+      filename: string;
+      content: Buffer;
+    }[] = [];
+
+    let totalSize = 0;
+
+    const fileFields = [
+      "blFile",
+      "invoiceFile",
+      "packingListFile",
+      "permitFile",
+    ];
+
+    async function processFile(file: File) {
+      if (!isAllowedFile(file.name)) {
+        throw new Error(
+          `File type not allowed: ${file.name}`
+        );
+      }
+
+      totalSize += file.size;
+
+      if (totalSize > MAX_FILE_SIZE) {
+        throw new Error(
+          "Total attachment size exceeds 20MB."
+        );
+      }
+
+      uploadedFiles.push(file.name);
+
+      const bytes =
+        await file.arrayBuffer();
+
+      attachments.push({
+        filename: file.name,
+        content: Buffer.from(bytes),
+      });
+    }
+
+    for (const field of fileFields) {
+      const file = formData.get(field);
+
+      if (
+        file &&
+        typeof file !== "string"
+      ) {
+        await processFile(file);
+      }
+    }
+
+    const others =
+      formData.getAll("otherFiles");
+
+    for (const file of others) {
+      if (
+        file &&
+        typeof file !== "string"
+      ) {
+        await processFile(file);
+      }
+    }
+
+    await transporter.sendMail({
+      from: process.env.MAIL_FROM,
+      to: process.env.MAIL_TO,
+      subject: `Quotation Request ${reference}`,
+      attachments,
+      html: `
+        <h2>MarineTraffic Group</h2>
+
+        <p>
+          <strong>Reference:</strong>
+          ${reference}
+        </p>
+
+        <p><strong>Company:</strong> ${companyName}</p>
+        <p><strong>Contact:</strong> ${contactPerson}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+
+        <hr/>
+
+        <p><strong>Origin:</strong> ${origin}</p>
+        <p><strong>Destination:</strong> ${destination}</p>
+        <p><strong>Cargo Type:</strong> ${cargoType}</p>
+        <p><strong>Weight:</strong> ${weight}</p>
+
+        <p><strong>Description:</strong></p>
+        <p>${description}</p>
+
+        <hr/>
+
+        <ul>
+          ${uploadedFiles
+            .map((file) => `<li>${file}</li>`)
+            .join("")}
+        </ul>
+      `,
+    });
+
+    if (email) {
+      await transporter.sendMail({
+        from: process.env.MAIL_FROM,
+        to: email,
+        subject:
+          `MarineTraffic Quote Request Received (${reference})`,
+        html: `
+          <h2>Thank You</h2>
+
+          <p>
+            We have received your quotation request.
+          </p>
+
+          <p>
+            Reference:
+            <strong>${reference}</strong>
+          </p>
+
+          <p>
+            Our team will contact you shortly.
+          </p>
+        `,
+      });
+    }
+
+
+    }
+
+    const { error: quoteError } = await supabaseServer
+      .from("quotes")
+      .insert({
+        reference,
+        company_name: companyName,
+        contact_person: contactPerson,
+        email,
+        phone,
+        origin,
+        destination,
+        cargo_type: cargoType,
+        weight,
+        description,
+        status: "pending",
+      });
+
+    if (quoteError) {
+      console.error("QUOTE SAVE ERROR:", quoteError);
+
+      return NextResponse.json(
+        {
+          success: false,
+          source: "quotes_insert",
+          message: quoteError.message,
+          details: quoteError,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    console.log("QUOTE SAVED:", reference);
+
+    return NextResponse.json({
+      success: true,
+      reference,
+    });
+  } catch (error: any) {
+    console.error(
+      "QUOTE API ERROR:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          error?.message ||
+          "Failed to send quotation request.",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}

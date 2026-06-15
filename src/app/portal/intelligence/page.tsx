@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import PortalSidebar from "@/components/portal/PortalSidebar";
 
 const WorldMap = dynamic(
   () => import("@/components/tracking/WorldMap"),
@@ -130,7 +129,6 @@ export default function IntelligencePage() {
 
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
 
-          <PortalSidebar />
 
           <div>
 

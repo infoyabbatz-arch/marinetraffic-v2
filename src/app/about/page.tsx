@@ -450,7 +450,7 @@ export default function AboutPage() {
               href="/portal/login"
               className="rounded-xl border border-white px-8 py-4 font-bold"
             >
-              Access Bandari Salama™
+              Bandari Salama ERP™
             </a>
           </div>
         </div>

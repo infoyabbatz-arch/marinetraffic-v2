@@ -1,11 +1,9 @@
 "use client";
 
 import AuthGuard from "@/components/auth/AuthGuard";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import PortalSidebar from "@/components/portal/PortalSidebar";
 
 type Quote = {
   id: string;
@@ -14,95 +12,275 @@ type Quote = {
   destination: string;
   cargo_type: string;
   status: string;
+  amount?: number;
+  currency?: string;
+};
+
+type Customer = {
+  id: string;
+  company_name: string;
 };
 
 export default function QuotesPage() {
   const router = useRouter();
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
-  useEffect(() => {
-    async function loadQuotes() {
-      const {
-        data: { user },
-      } = await supabaseBrowser.auth.getUser();
+  const [customerId, setCustomerId] = useState("");
+  const [reference, setReference] = useState("");
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [cargoType, setCargoType] = useState("");
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("USD");
 
-      if (!user) {
-          router.push("/portal/login");
-          return;
-        }
+  async function loadData() {
+    const {
+      data: { user },
+    } = await supabaseBrowser.auth.getUser();
 
-      const { data: customer } = await supabaseBrowser
-        .from("customers")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      const customerRecord: any = customer;
-
-      if (!customerRecord) return;
-
-      const { data } = await supabaseBrowser
-        .from("quotes")
-        .select("*")
-        .eq("customer_id", customerRecord.id)
-        .order("created_at", {
-          ascending: false,
-        });
-
-      setQuotes(data || []);
+    if (!user) {
+      router.push("/portal/login");
+      return;
     }
 
-    loadQuotes();
+    const { data: quotesData } = await supabaseBrowser
+      .from("quotes")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    const { data: customersData } = await supabaseBrowser
+      .from("customers")
+      .select("id,company_name")
+      .order("company_name");
+
+    setQuotes(quotesData || []);
+    setCustomers(customersData || []);
+  }
+
+  useEffect(() => {
+    loadData();
   }, []);
 
+  async function createQuote() {
+    if (!reference || !origin || !destination) {
+      alert("Fill all required fields");
+      return;
+    }
+
+    const { error } = await supabaseBrowser
+      .from("quotes")
+      .insert({
+        customer_id: customerId || null,
+        reference,
+        origin,
+        destination,
+        cargo_type: cargoType,
+        amount: Number(amount || 0),
+        currency,
+        status: "draft",
+      } as any);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setReference("");
+    setOrigin("");
+    setDestination("");
+    setCargoType("");
+    setAmount("");
+
+
+
+    await loadData();
+
+    alert("Quote created");
+  }
+
+
+
+  async function convertToShipment(quote: any) {
+    const response = await fetch(
+      "/api/quotes/convert",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          quoteId: quote.id
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!result.success) {
+      alert(
+        result.message ||
+        "Conversion failed"
+      );
+      return;
+    }
+
+    setQuotes((prev) =>
+      prev.map((q) =>
+        q.id === quote.id
+          ? { ...q, status: "converted" }
+          : q
+      )
+    );
+
+    await loadData();
+
+    alert(
+      "Shipment created: " +
+      result.trackingNumber
+    );
+  }
+
   return (
+
     <AuthGuard>
-<main className="min-h-screen bg-slate-100">
-      <div className="mx-auto max-w-7xl p-6">
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <PortalSidebar />
+      <main className="min-h-screen bg-slate-100 p-8">
+        <div className="mx-auto max-w-7xl space-y-8">
 
-          <div>
-            <h1 className="text-4xl font-black">
-              My Quotes
+          <div className="rounded-3xl bg-white p-8 shadow-sm">
+            <h1 className="text-5xl font-black">
+              Quotes Center
             </h1>
+            <p className="mt-2 text-slate-500">
+              Commercial quotation management.
+            </p>
+          </div>
 
-            <div className="mt-8 space-y-4">
-              {quotes.map((quote) => (
-                <div
-                  key={quote.id}
-                  className="rounded-xl border bg-white p-5"
-                >
-                  <p className="font-bold">
-                    {quote.reference}
-                  </p>
+          <div className="rounded-3xl bg-white p-8 shadow-sm">
+            <h2 className="mb-6 text-3xl font-black">
+              Create Quote
+            </h2>
 
-                  <p>
-                    {quote.origin} → {quote.destination}
-                  </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <select
+                value={customerId}
+                onChange={(e)=>setCustomerId(e.target.value)}
+                className="rounded-xl border p-3"
+              >
+                <option value="">Select Customer</option>
+                {customers.map((customer)=>(
+                  <option key={customer.id} value={customer.id}>
+                    {customer.company_name}
+                  </option>
+                ))}
+              </select>
 
-                  <p>
-                    Cargo: {quote.cargo_type}
-                  </p>
+              <input
+                value={reference}
+                onChange={(e)=>setReference(e.target.value)}
+                placeholder="Quote Reference"
+                className="rounded-xl border p-3"
+              />
 
-                  <p>
-                    Status: {quote.status}
-                  </p>
-                </div>
-              ))}
+              <input
+                value={origin}
+                onChange={(e)=>setOrigin(e.target.value)}
+                placeholder="Origin"
+                className="rounded-xl border p-3"
+              />
 
-              {quotes.length === 0 && (
-                <div className="rounded-xl border bg-white p-5">
-                  No quotations found.
-                </div>
-              )}
+              <input
+                value={destination}
+                onChange={(e)=>setDestination(e.target.value)}
+                placeholder="Destination"
+                className="rounded-xl border p-3"
+              />
+
+              <input
+                value={cargoType}
+                onChange={(e)=>setCargoType(e.target.value)}
+                placeholder="Cargo Type"
+                className="rounded-xl border p-3"
+              />
+
+              <input
+                value={amount}
+                onChange={(e)=>setAmount(e.target.value)}
+                placeholder="Amount"
+                className="rounded-xl border p-3"
+              />
+
+              <select
+                value={currency}
+                onChange={(e)=>setCurrency(e.target.value)}
+                className="rounded-xl border p-3"
+              >
+                <option value="USD">USD</option>
+                <option value="TZS">TZS</option>
+                <option value="EUR">EUR</option>
+              </select>
             </div>
+
+            <button
+              onClick={createQuote}
+              className="mt-6 rounded-xl bg-slate-900 px-6 py-3 text-white"
+            >
+              Create Quote
+            </button>
+          </div>
+
+          <div className="rounded-3xl bg-white p-8 shadow-sm">
+            <h2 className="mb-6 text-3xl font-black">
+              Quote Registry
+            </h2>
+
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-3 text-left">Reference</th>
+                  <th className="p-3 text-left">Origin</th>
+                  <th className="p-3 text-left">Destination</th>
+                  <th className="p-3 text-left">Cargo</th>
+                  <th className="p-3 text-left">Amount</th>
+                  <th className="p-3 text-left">Status</th>
+<th className="p-3 text-left">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {quotes.map((quote)=>(
+                  <tr key={quote.id} className="border-b">
+                    <td className="p-3">{quote.reference}</td>
+                    <td className="p-3">{quote.origin}</td>
+                    <td className="p-3">{quote.destination}</td>
+                    <td className="p-3">{quote.cargo_type}</td>
+                    <td className="p-3">
+                      {quote.amount || 0} {quote.currency || "USD"}
+                    </td>
+                    <td className="p-3">{quote.status}</td>
+<td className="p-3">
+  {quote.status !== "converted" ? (
+    <button
+      onClick={() => convertToShipment(quote)}
+      className="rounded bg-blue-600 px-3 py-1 text-white"
+    >
+      Convert
+    </button>
+  ) : (
+    <span className="text-green-600 font-semibold">
+      Converted
+    </span>
+  )}
+</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
         </div>
-      </div>
-    </main>
-</AuthGuard>
+      </main>
+    </AuthGuard>
   );
 }

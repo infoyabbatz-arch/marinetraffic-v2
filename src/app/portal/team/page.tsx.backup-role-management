@@ -1,0 +1,291 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabaseBrowser } from "@/lib/supabase/browser";
+
+export default function TeamPage() {
+  const [members, setMembers] = useState<any[]>([]);
+  const [invites, setInvites] = useState<any[]>([]);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [maxUsers, setMaxUsers] = useState(2);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("viewer");
+  const [companyId, setCompanyId] = useState("");
+
+
+  async function load() {
+    const {
+      data: { user },
+    } = await supabaseBrowser.auth.getUser();
+
+    if (!user) return;
+
+    const { data: orgUser } = await supabaseBrowser
+      .from("organization_users")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const companyId = (orgUser as any)?.company_id;
+
+    if (!companyId) return;
+
+    setCompanyId(companyId);
+
+
+    const { data: teamMembers } = await supabaseBrowser
+      .from("organization_users")
+      .select("*")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: true });
+
+    setMembers(teamMembers || []);
+
+    const { count } = await supabaseBrowser
+      .from("organization_users")
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq("company_id", companyId);
+
+    setActiveUsers(count || 0);
+
+    const { data: license } = await supabaseBrowser
+      .from("licenses")
+      .select("*")
+      .eq("company_id", companyId)
+      .maybeSingle();
+
+    setMaxUsers((license as any)?.max_users || 2);
+
+    const { data: pendingInvites } = await supabaseBrowser
+      .from("staff_invitations")
+      .select("*")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false });
+
+    setInvites(pendingInvites || []);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  
+  async function inviteMember() {
+    if (!inviteEmail) {
+      alert("Enter email");
+      return;
+    }
+
+    if (activeUsers >= maxUsers) {
+      alert("License limit reached");
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabaseBrowser.auth.getUser();
+
+    const invitationPayload: any = {
+      company_id: companyId,
+      email: inviteEmail,
+      role: inviteRole,
+      invited_by: user?.id,
+      status: "pending",
+    };
+
+    const { error } = await (supabaseBrowser as any)
+      .from("staff_invitations")
+      .insert(invitationPayload);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setInviteEmail("");
+    setInviteRole("viewer");
+
+    await load();
+
+    alert("Invitation created");
+  }
+
+
+const seatsRemaining = maxUsers - activeUsers;
+  const limitReached = seatsRemaining <= 0;
+
+  return (
+    <main className="space-y-6">
+
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <h1 className="text-4xl font-black">
+          Team Management
+        </h1>
+
+        <p className="mt-2 text-slate-500">
+          Manage organization users, invitations and license seats.
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-sm text-slate-500">
+            Active Users
+          </div>
+
+          <div className="mt-2 text-5xl font-black">
+            {activeUsers}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-sm text-slate-500">
+            Seats Available
+          </div>
+
+          <div className="mt-2 text-5xl font-black">
+            {seatsRemaining}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-sm text-slate-500">
+            License Limit
+          </div>
+
+          <div className="mt-2 text-5xl font-black">
+            {maxUsers}
+          </div>
+        </div>
+
+      </div>
+
+      <div className="rounded-3xl bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-black">
+          Seat Usage
+        </h2>
+
+        <div className="mt-3">
+          {activeUsers} / {maxUsers} seats used
+        </div>
+
+        {limitReached && (
+          <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 font-bold">
+            License limit reached. Upgrade subscription.
+          </div>
+        )}
+      </div>
+
+      
+      <div className="rounded-3xl bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-black">
+          Invite Team Member
+        </h2>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+
+          <input
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            placeholder="email@company.com"
+            className="rounded-xl border p-3"
+          />
+
+          <select
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value)}
+            className="rounded-xl border p-3"
+          >
+            <option value="viewer">Viewer</option>
+            <option value="operator">Operator</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <button
+            onClick={inviteMember}
+            className="rounded-xl bg-slate-900 p-3 font-bold text-white"
+          >
+            Send Invitation
+          </button>
+
+        </div>
+      </div>
+
+
+<div className="rounded-3xl bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-black">
+          Team Members
+        </h2>
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Email</th>
+                <th className="p-3 text-left">Role</th>
+                <th className="p-3 text-left">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {members.map((member) => (
+                <tr key={member.id} className="border-b">
+                  <td className="p-3">
+                    {member.full_name || "-"}
+                  </td>
+
+                  <td className="p-3">
+                    {member.email || "-"}
+                  </td>
+
+                  <td className="p-3">
+                    {member.role}
+                  </td>
+
+                  <td className="p-3">
+                    {member.status || "active"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="rounded-3xl bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-black">
+          Pending Invitations
+        </h2>
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3 text-left">Email</th>
+                <th className="p-3 text-left">Role</th>
+                <th className="p-3 text-left">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {invites.map((invite) => (
+                <tr key={invite.id} className="border-b">
+                  <td className="p-3">{invite.email}</td>
+                  <td className="p-3">{invite.role}</td>
+                  <td className="p-3">{invite.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  );
+}

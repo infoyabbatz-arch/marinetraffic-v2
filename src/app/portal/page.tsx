@@ -1,164 +1,163 @@
 "use client";
 
-import AuthGuard from "@/components/auth/AuthGuard";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabase/browser";
-import PortalSidebar from "@/components/portal/PortalSidebar";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
-type Company = {
-  name?: string;
-  country?: string;
-  industry?: string;
-};
+export default function PortalDashboard() {
 
-type Subscription = {
-  plan?: string;
-  status?: string;
-  renewal_date?: string;
-};
+  const [customers,setCustomers] = useState(0);
+  const [documents,setDocuments] = useState(0);
+  const [shipments,setShipments] = useState(0);
+  const [jobs,setJobs] = useState(0);
+  const [invoices,setInvoices] = useState<any[]>([]);
 
-type License = {
-  status?: string;
-  max_users?: number;
-};
+  useEffect(()=>{
 
-export default function PortalPage() {
-  const router = useRouter();
+    async function load(){
 
-  const [email, setEmail] = useState("");
-  const [company, setCompany] = useState<Company | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [license, setLicense] = useState<License | null>(null);
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    async function loadPortal() {
-      const {
-        data: { user },
-      } = await supabaseBrowser.auth.getUser();
+        if (!user) return;
 
-      if (!user) {
-        router.push("/portal/login");
-        return;
-      }
+        const { data: customer } =
+          await supabase
+            .from("customers")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle();
 
-      setEmail(user.email || "");
+        
+const { data: membership } = await supabase
+  .from("organization_users")
+  .select("company_id")
+  .eq("user_id", user.id)
+  .maybeSingle();
 
-      const { data: orgUser } = await supabaseBrowser
-        .from("organization_users")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+const companyId = membership?.company_id;
 
-      const orgUserRecord: any = orgUser;
+console.log("DASHBOARD COMPANY:", companyId);
 
-      if (!orgUserRecord?.company_id) return;
 
-      const companyId = orgUserRecord.company_id;
+        if (!companyId) return;
 
-      const { data: companyData } = await supabaseBrowser
-        .from("companies")
-        .select("*")
-        .eq("id", companyId)
-        .maybeSingle();
 
-      const { data: subscriptionData } = await supabaseBrowser
-        .from("subscriptions")
-        .select("*")
-        .eq("company_id", companyId)
-        .maybeSingle();
+      const { count: customerCount } =
+        await supabase
+          .from("customers")
+          .select("*",{count:"exact",head:true});
 
-      const { data: licenseData } = await supabaseBrowser
-        .from("licenses")
-        .select("*")
-        .eq("company_id", companyId)
-        .maybeSingle();
+      const { count: documentCount } =
+        await supabase
+          .from("documents")
+          .select("*",{count:"exact",head:true});
 
-      setCompany(companyData);
-      setSubscription(subscriptionData);
-      setLicense(licenseData);
+      const { count: shipmentCount } =
+        await supabase
+          .from("shipments")
+          .select("*",{count:"exact",head:true});
+
+      const { count: jobCount } =
+        await supabase
+          .from("customs_jobs")
+          .select("*",{count:"exact",head:true});
+
+      const { data: invoiceData } =
+        await supabase
+          .from("invoices")
+          .select("*");
+
+      setCustomers(customerCount || 0);
+      setDocuments(documentCount || 0);
+      setShipments(shipmentCount || 0);
+      setJobs(jobCount || 0);
+      setInvoices(invoiceData || []);
+
     }
 
-    loadPortal();
-  }, [router]);
+    load();
+
+  },[]);
+
+  const revenue = useMemo(
+    ()=> invoices.reduce(
+      (a,b)=>a + Number(b.amount || 0),0
+    ),
+    [invoices]
+  );
 
   return (
-    <AuthGuard>
-      <main className="min-h-screen bg-slate-100">
-        <div className="mx-auto max-w-7xl p-6">
-          <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-            <PortalSidebar />
+    <main className="space-y-8">
 
-            <div className="space-y-6">
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <h1 className="text-5xl font-black">
+          Bandari Salama ERP™
+        </h1>
 
-              <div className="rounded-3xl bg-white p-8 shadow-sm">
-                <h1 className="text-4xl font-black">
-                  MarineTraffic SaaS Portal
-                </h1>
+        <p className="mt-2 text-slate-500">
+          Operational Control Tower
+        </p>
+      </div>
 
-                <p className="mt-2 text-slate-600">
-                  Logged in as {email}
-                </p>
-              </div>
+      <div className="grid gap-6 md:grid-cols-3">
 
-              <div className="grid gap-6 md:grid-cols-3">
-
-                <div className="rounded-3xl bg-white p-6 shadow-sm">
-                  <h2 className="font-black text-xl">
-                    Company
-                  </h2>
-
-                  <p className="mt-4">
-                    {company?.name || "No company linked"}
-                  </p>
-
-                  <p className="text-sm text-slate-500">
-                    {company?.industry || "-"}
-                  </p>
-
-                  <p className="text-sm text-slate-500">
-                    {company?.country || "-"}
-                  </p>
-                </div>
-
-                <div className="rounded-3xl bg-white p-6 shadow-sm">
-                  <h2 className="font-black text-xl">
-                    Subscription
-                  </h2>
-
-                  <p className="mt-4">
-                    Plan: {subscription?.plan || "-"}
-                  </p>
-
-                  <p>
-                    Status: {subscription?.status || "-"}
-                  </p>
-
-                  <p>
-                    Renewal: {subscription?.renewal_date || "-"}
-                  </p>
-                </div>
-
-                <div className="rounded-3xl bg-white p-6 shadow-sm">
-                  <h2 className="font-black text-xl">
-                    License
-                  </h2>
-
-                  <p className="mt-4">
-                    Status: {license?.status || "-"}
-                  </p>
-
-                  <p>
-                    Max Users: {license?.max_users || 0}
-                  </p>
-                </div>
-
-              </div>
-
-            </div>
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Customers
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {customers}
           </div>
         </div>
-      </main>
-    </AuthGuard>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Documents
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {documents}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Shipments
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {shipments}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Customs Jobs
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {jobs}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Invoices
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {invoices.length}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Revenue
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {revenue}
+          </div>
+        </div>
+
+      </div>
+
+    </main>
   );
 }

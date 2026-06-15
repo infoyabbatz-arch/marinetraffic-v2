@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import PortalSidebar from "@/components/portal/PortalSidebar";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
 type Customer = {
@@ -40,7 +39,6 @@ export default function ProfilePage() {
     <main className="min-h-screen bg-slate-100">
       <div className="mx-auto max-w-7xl p-6">
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <PortalSidebar />
 
           <div>
             <h1 className="text-4xl font-black">

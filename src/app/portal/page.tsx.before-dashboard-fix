@@ -1,0 +1,157 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+
+export default function PortalDashboard() {
+
+  const [customers,setCustomers] = useState(0);
+  const [documents,setDocuments] = useState(0);
+  const [shipments,setShipments] = useState(0);
+  const [jobs,setJobs] = useState(0);
+  const [invoices,setInvoices] = useState<any[]>([]);
+
+  useEffect(()=>{
+
+    async function load(){
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) return;
+
+        const { data: customer } =
+          await supabase
+            .from("customers")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        
+console.log("DASHBOARD CUSTOMER:", customer);
+const companyId = customer?.company_id;
+console.log("DASHBOARD COMPANY:", companyId);
+
+
+        if (!companyId) return;
+
+
+      const { count: customerCount } =
+        await supabase
+          .from("customers")
+          .select("*",{count:"exact",head:true});
+
+      const { count: documentCount } =
+        await supabase
+          .from("documents")
+          .select("*",{count:"exact",head:true});
+
+      const { count: shipmentCount } =
+        await supabase
+          .from("shipments")
+          .select("*",{count:"exact",head:true});
+
+      const { count: jobCount } =
+        await supabase
+          .from("customs_jobs")
+          .select("*",{count:"exact",head:true});
+
+      const { data: invoiceData } =
+        await supabase
+          .from("invoices")
+          .select("*");
+
+      setCustomers(customerCount || 0);
+      setDocuments(documentCount || 0);
+      setShipments(shipmentCount || 0);
+      setJobs(jobCount || 0);
+      setInvoices(invoiceData || []);
+
+    }
+
+    load();
+
+  },[]);
+
+  const revenue = useMemo(
+    ()=> invoices.reduce(
+      (a,b)=>a + Number(b.amount || 0),0
+    ),
+    [invoices]
+  );
+
+  return (
+    <main className="space-y-8">
+
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <h1 className="text-5xl font-black">
+          Bandari Salama ERP™
+        </h1>
+
+        <p className="mt-2 text-slate-500">
+          Operational Control Tower
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Customers
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {customers}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Documents
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {documents}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Shipments
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {shipments}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Customs Jobs
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {jobs}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Invoices
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {invoices.length}
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="text-slate-500">
+            Revenue
+          </div>
+          <div className="mt-2 text-5xl font-black">
+            {revenue}
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  );
+}

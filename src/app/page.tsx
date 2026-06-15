@@ -1,4 +1,5 @@
 
+import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/sections/Hero";
 import Stats from "@/components/sections/Stats";
 import AnnouncementCenter from "@/components/sections/AnnouncementCenter";
@@ -17,6 +18,7 @@ import WhatsAppButton from "@/components/ui/WhatsAppButton";
 export default function Home() {
   return (
     <>
+      <Navbar />
       
 
       <Hero />

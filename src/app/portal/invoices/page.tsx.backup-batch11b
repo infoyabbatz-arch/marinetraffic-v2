@@ -1,0 +1,188 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+
+export default function InvoicesPage() {
+
+  const [invoices,setInvoices] = useState<any[]>([]);
+  const [customers,setCustomers] = useState<any[]>([]);
+
+  const [customerId,setCustomerId] = useState("");
+  const [invoiceNumber,setInvoiceNumber] = useState("");
+  const [amount,setAmount] = useState("");
+  const [currency,setCurrency] = useState("USD");
+  const [dueDate,setDueDate] = useState("");
+
+  async function loadData() {
+
+    const { data: invoiceData } =
+      await supabase
+        .from("invoices")
+        .select("*")
+        .order("created_at",{ascending:false});
+
+    const { data: customerData } =
+      await supabase
+        .from("customers")
+        .select("*")
+        .order("company_name");
+
+    setInvoices(invoiceData || []);
+    setCustomers(customerData || []);
+  }
+
+  useEffect(()=>{
+    loadData();
+  },[]);
+
+  async function createInvoice() {
+
+    if(!invoiceNumber){
+      alert("Enter invoice number");
+      return;
+    }
+
+    const { error } =
+      await supabase
+        .from("invoices")
+        .insert({
+          customer_id: customerId || null,
+          invoice_number: invoiceNumber,
+          amount: Number(amount || 0),
+          currency,
+          due_date: dueDate || null,
+          status: "draft"
+        } as any);
+
+    if(error){
+      alert(error.message);
+      return;
+    }
+
+    setCustomerId("");
+    setInvoiceNumber("");
+    setAmount("");
+    setCurrency("USD");
+    setDueDate("");
+
+    await loadData();
+
+    alert("Invoice created");
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-100 p-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 className="text-5xl font-black">
+            Invoice Center
+          </h1>
+
+          <p className="mt-2 text-slate-500">
+            Billing and revenue management.
+          </p>
+        </div>
+
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+
+          <h2 className="mb-6 text-3xl font-black">
+            Create Invoice
+          </h2>
+
+          <div className="grid gap-4 md:grid-cols-2">
+
+            <select
+              value={customerId}
+              onChange={(e)=>setCustomerId(e.target.value)}
+              className="rounded-xl border p-3"
+            >
+              <option value="">Select Customer</option>
+
+              {customers.map((c)=>(
+                <option key={c.id} value={c.id}>
+                  {c.company_name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              value={invoiceNumber}
+              onChange={(e)=>setInvoiceNumber(e.target.value)}
+              placeholder="Invoice Number"
+              className="rounded-xl border p-3"
+            />
+
+            <input
+              value={amount}
+              onChange={(e)=>setAmount(e.target.value)}
+              placeholder="Amount"
+              className="rounded-xl border p-3"
+            />
+
+            <select
+              value={currency}
+              onChange={(e)=>setCurrency(e.target.value)}
+              className="rounded-xl border p-3"
+            >
+              <option>USD</option>
+              <option>TZS</option>
+              <option>EUR</option>
+            </select>
+
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e)=>setDueDate(e.target.value)}
+              className="rounded-xl border p-3"
+            />
+
+          </div>
+
+          <button
+            onClick={createInvoice}
+            className="mt-6 rounded-xl bg-slate-900 px-6 py-3 text-white"
+          >
+            Create Invoice
+          </button>
+
+        </div>
+
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+
+          <h2 className="mb-6 text-3xl font-black">
+            Invoice Registry
+          </h2>
+
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3 text-left">Invoice</th>
+                <th className="p-3 text-left">Amount</th>
+                <th className="p-3 text-left">Currency</th>
+                <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Due Date</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {invoices.map((invoice)=>(
+                <tr key={invoice.id} className="border-b">
+                  <td className="p-3">{invoice.invoice_number}</td>
+                  <td className="p-3">{invoice.amount}</td>
+                  <td className="p-3">{invoice.currency}</td>
+                  <td className="p-3">{invoice.status}</td>
+                  <td className="p-3">{invoice.due_date}</td>
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+    </main>
+  );
+}

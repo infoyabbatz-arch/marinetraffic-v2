@@ -1,0 +1,25 @@
+"use client";
+
+import PortalSidebar from "@/components/portal/PortalSidebar";
+
+export default function PortalLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-h-screen bg-slate-100">
+      <div className="mx-auto max-w-[1800px] p-6">
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+
+          <PortalSidebar />
+
+          <main className="min-h-[calc(100vh-48px)]">
+            {children}
+          </main>
+
+        </div>
+      </div>
+    </div>
+  );
+}

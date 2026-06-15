@@ -4,15 +4,22 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
-
 const items = [
   {
     label: "Dashboard",
     href: "/portal",
   },
   {
+    label: "Team",
+    href: "/portal/team",
+  },
+  {
     label: "Customers",
     href: "/portal/customers",
+  },
+  {
+    label: "Billing",
+    href: "/portal/billing",
   },
   {
     label: "Invoices",
@@ -23,14 +30,6 @@ const items = [
     href: "/portal/reports",
   },
   {
-    label: "Quotes",
-    href: "/portal/quotes",
-  },
-  {
-    label: "Shipments",
-    href: "/portal/shipments",
-  },
-  {
     label: "Documents",
     href: "/portal/documents",
   },
@@ -39,16 +38,14 @@ const items = [
     href: "/portal/tracking",
   },
   {
-    label: "Billing & Subscription",
-    href: "/pricing",
+    label: "Customs Jobs",
+    href: "/portal/customs-jobs",
   },
   {
-    label: "Profile",
-    href: "/portal/profile",
+    label: "Settings",
+    href: "/portal/settings",
   },
 ];
-
-
 
 export default function PortalSidebar() {
   const pathname = usePathname();
@@ -62,13 +59,9 @@ export default function PortalSidebar() {
   return (
     <aside className="rounded-3xl border bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-2xl font-black leading-none">
-          Bandari Salama™
+        <h2 className="text-2xl font-black">
+          Bandari Salama ERP™
         </h2>
-
-        <div className="text-right text-sm font-semibold -mt-1">
-          By faithfulyabba
-        </div>
       </div>
 
       <div className="mt-8 space-y-3">
@@ -82,7 +75,7 @@ export default function PortalSidebar() {
               className={
                 active
                   ? "block rounded-xl px-4 py-3 font-bold bg-slate-900 text-white"
-                  : "block rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-50 hover:text-slate-900"
+                  : "block rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-50"
               }
             >
               {item.label}
@@ -93,7 +86,7 @@ export default function PortalSidebar() {
 
       <button
         onClick={handleLogout}
-        className="mt-6 w-full rounded-xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
+        className="mt-6 w-full rounded-xl bg-red-600 px-4 py-3 font-bold text-white"
       >
         Logout
       </button>
