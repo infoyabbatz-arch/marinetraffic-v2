@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function PaymentPage() {
 
  const [reference,setReference] = useState("");
  const [payerName,setPayerName] = useState("");
  const [payerPhone,setPayerPhone] = useState("");
+const [companyId,setCompanyId] = useState("");
+
+useEffect(()=>{
+  const id = localStorage.getItem("companyId") || "";
+  setCompanyId(id);
+},[]);
+
 
  async function submitPayment() {
 
@@ -14,7 +21,7 @@ export default function PaymentPage() {
      method:"POST",
      headers:{ "Content-Type":"application/json" },
      body:JSON.stringify({
-       companyId:"demo-company",
+       companyId,
        amount:49,
        method:"Bank Transfer",
        reference,
