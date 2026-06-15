@@ -80,7 +80,7 @@ export default function AdminPaymentsPage() {
 
             <div className="flex gap-3 mt-5">
               <button
-                onClick={()=>updateStatus(payment.id,"approved")}
+                onClick={async()=>{const r=await fetch("/api/admin/payments/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId:payment.id})});const d=await r.json();if(!d.success){alert(d.error||"Approval failed");return;}await loadPayments();}}
                 className="px-4 py-2 bg-green-600 rounded-lg"
               >
                 Approve
