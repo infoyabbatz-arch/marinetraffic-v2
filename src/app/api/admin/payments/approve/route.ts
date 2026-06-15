@@ -16,6 +16,9 @@ export async function POST(req: Request) {
       .eq("id", paymentId)
       .single();
 
+console.log("PAYMENT_LOOKUP", paymentId, payment);
+
+
     if (!payment) {
       return NextResponse.json(
         { success:false, error:"Payment not found" },
