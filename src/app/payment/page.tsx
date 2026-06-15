@@ -59,9 +59,9 @@ useEffect(()=>{
 
          <div className="border rounded-xl p-5">
            <h2 className="font-bold text-xl mb-4">
-             Yas / Tigo Pesa
+             Yas / Tigo Pesa (Lipa Namba)
            </h2>
-           <p>+255770806822</p>
+           <p>45212958</p>
            <p>MarineTraffic Group Limited</p>
          </div>
 
